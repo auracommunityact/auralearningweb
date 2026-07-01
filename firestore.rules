@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function isValidWaitlistEntry(data) {
+      return data.keys().hasAll(['email', 'createdAt']) &&
+             data.keys().hasOnly(['email', 'createdAt', 'source']) &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 256 &&
+             data.createdAt == request.time &&
+             (data.get('source', '') is string);
+    }
+
+    match /waitlist/{entryId} {
+      // Anyone can create a waitlist entry if they follow the schema
+      allow create: if isValidId(entryId) && isValidWaitlistEntry(request.resource.data);
+    }
+  }
+}
