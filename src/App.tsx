@@ -5,10 +5,16 @@ import { Leaf, ArrowRight, Twitter, Facebook, Linkedin, Loader2, CheckCircle2 } 
 import { motion } from 'motion/react';
 import { db, auth } from './lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+
+const provider = new GoogleAuthProvider();
+provider.addScope('https://www.googleapis.com/auth/classroom.courses.readonly');
+provider.addScope('https://www.googleapis.com/auth/classroom.profile.emails');
 
 export default function App() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLogin, setIsLogin] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [user, setUser] = useState<User | null>(null);
@@ -26,9 +32,7 @@ export default function App() {
 
   async function handleGoogleSignIn() {
     setIsSigningIn(true);
-    const provider = new GoogleAuthProvider();
-    provider.addScope('https://www.googleapis.com/auth/classroom.courses.readonly');
-    provider.addScope('https://www.googleapis.com/auth/classroom.profile.emails');
+    setErrorMessage('');
     try {
       const result = await signInWithPopup(auth, provider);
       setUser(result.user);
@@ -52,6 +56,13 @@ export default function App() {
       }
     } catch (error: any) {
       console.error("Error signing in with Google", error);
+      
+      // Ignore popup closed by user, it's not a real error
+      if (error?.code === 'auth/popup-closed-by-user') {
+        setIsSigningIn(false);
+        return;
+      }
+      
       setStatus('error');
       if (error?.code === 'auth/network-request-failed') {
         setErrorMessage("Sign-in failed. Please click 'Open in new tab' in the top right corner of the preview, as authentication popups are blocked inside the preview iframe.");
@@ -68,41 +79,33 @@ export default function App() {
     setUser(null);
   }
 
-  async function handleSignup(e: React.FormEvent) {
+  async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !password) return;
 
     setStatus('loading');
     setErrorMessage('');
 
     try {
-      // 1. Save to Firestore
-      try {
-        await addDoc(collection(db, 'waitlist'), {
-          email,
-          createdAt: serverTimestamp()
-        });
-      } catch (dbError: any) {
-        console.error("Firestore error:", dbError);
-        // We throw if we fail to save to db to prevent silent failures
-        throw new Error("Could not save your registration. Please try again.");
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Save to waitlist collection for consistency
+        try {
+          await addDoc(collection(db, 'waitlist'), {
+            email: result.user.email,
+            createdAt: serverTimestamp(),
+            source: 'email_password'
+          });
+        } catch (dbError) {
+          console.error("Firestore error:", dbError);
+        }
       }
-
-      // 2. Send email via our backend
-      const response = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send confirmation email');
-      }
-
       setStatus('success');
       setEmail('');
+      setPassword('');
     } catch (err: any) {
       console.error(err);
       setStatus('error');
@@ -157,7 +160,7 @@ export default function App() {
             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
             className="bg-white/60 backdrop-blur-xl border border-white/50 shadow-xl rounded-3xl p-8 max-w-xl mx-auto relative overflow-hidden"
           >
-            {status === 'success' ? (
+            {user ? (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -166,49 +169,86 @@ export default function App() {
                 <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center text-teal-600">
                   <CheckCircle2 size={32} />
                 </div>
-                <h3 className="text-2xl font-medium text-slate-900">You're on the list!</h3>
-                <p className="text-slate-500">Keep an eye on your inbox for early access updates.</p>
+                <h3 className="text-2xl font-medium text-slate-900">Welcome, {user.email}!</h3>
+                <p className="text-slate-500">You are securely signed in.</p>
+                <button 
+                  onClick={handleSignOut}
+                  className="mt-4 px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors"
+                >
+                  Sign Out
+                </button>
+              </motion.div>
+            ) : status === 'success' ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center justify-center space-y-4 py-6"
+              >
+                <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center text-teal-600">
+                  <CheckCircle2 size={32} />
+                </div>
+                <h3 className="text-2xl font-medium text-slate-900">Success!</h3>
+                <p className="text-slate-500">You're all set.</p>
                 <button 
                   onClick={() => setStatus('idle')}
                   className="mt-4 text-teal-600 hover:text-teal-700 font-medium text-sm transition-colors"
                 >
-                  Register another email
+                  Continue
                 </button>
               </motion.div>
             ) : (
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <h3 className="text-xl font-medium text-slate-900">Get Early Access</h3>
-                  <p className="text-sm text-slate-500">Sign up now to be the first to experience Aura.</p>
+                  <h3 className="text-xl font-medium text-slate-900">{isLogin ? "Sign In" : "Get Early Access"}</h3>
+                  <p className="text-sm text-slate-500">{isLogin ? "Welcome back to Aura." : "Sign up now to be the first to experience Aura."}</p>
                 </div>
                 
-                <form onSubmit={handleSignup} className="flex flex-col sm:flex-row gap-3">
+                <form onSubmit={handleAuth} className="flex flex-col gap-4">
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    className="flex-1 px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-700 placeholder:text-slate-400"
+                    placeholder="Email address"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-700 placeholder:text-slate-400"
+                    disabled={status === 'loading'}
+                  />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-700 placeholder:text-slate-400"
                     disabled={status === 'loading'}
                   />
                   <button
                     type="submit"
                     disabled={status === 'loading'}
-                    className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium transition-all shadow-md shadow-teal-500/20 flex items-center justify-center min-w-[140px] disabled:opacity-70 group"
+                    className="w-full px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium transition-all shadow-md shadow-teal-500/20 flex items-center justify-center disabled:opacity-70 group"
                   >
                     {status === 'loading' ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       <>
-                        Join Waitlist
+                        {isLogin ? "Sign In" : "Sign Up"}
                         <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}
                   </button>
                 </form>
+                
+                <div className="text-center">
+                  <button 
+                    onClick={() => setIsLogin(!isLogin)} 
+                    className="text-sm text-slate-500 hover:text-teal-600 transition-colors"
+                  >
+                    {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
+                  </button>
+                </div>
+                
                 {status === 'error' && (
-                  <p className="text-red-500 text-sm text-left">{errorMessage}</p>
+                  <p className="text-red-500 text-sm text-center">{errorMessage}</p>
                 )}
 
                 <div className="relative py-4">

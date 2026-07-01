@@ -82,7 +82,7 @@ app.post('/api/signup', async (req, res) => {
       });
       
       const authClient = await auth.getClient();
-      const gmail = google.gmail({ version: 'v1', auth: authClient });
+      const gmail = google.gmail({ version: 'v1', auth: authClient as any });
 
       const subject = "Welcome to the Aura Waitlist \u2728";
       const body = `
