@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Countdown } from './components/Countdown';
 import { Chatbot } from './components/Chatbot';
-import { Leaf, ArrowRight, Twitter, Facebook, Linkedin, Loader2, CheckCircle2 } from 'lucide-react';
+import { Leaf, ArrowRight, Twitter, Facebook, Linkedin, Loader2, CheckCircle2, Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import { db, auth } from './lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -14,6 +14,7 @@ provider.addScope('https://www.googleapis.com/auth/classroom.profile.emails');
 export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [isLogin, setIsLogin] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -31,6 +32,12 @@ export default function App() {
   const shareText = encodeURIComponent("Find your calm in learning. Join the waitlist for Aura, a minimalist and distraction-free learning platform!");
 
   async function handleGoogleSignIn() {
+    if (window !== window.top) {
+      setStatus('error');
+      setErrorMessage("Google Sign-In requires opening the app in a new tab. Please click 'Open in new tab' in the top right corner of the preview.");
+      return;
+    }
+    
     setIsSigningIn(true);
     setErrorMessage('');
     try {
@@ -81,7 +88,7 @@ export default function App() {
 
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
-    if (!email || !password) return;
+    if (!email || !password || emailError) return;
 
     setStatus('loading');
     setErrorMessage('');
@@ -109,7 +116,11 @@ export default function App() {
     } catch (err: any) {
       console.error(err);
       setStatus('error');
-      setErrorMessage(err.message || 'Something went wrong. Please try again.');
+      if (err?.code === 'auth/network-request-failed' || err?.message === 'Failed to fetch') {
+        setErrorMessage("Authentication failed. Please click 'Open in new tab' in the top right corner of the preview, as authentication may be blocked inside the preview iframe.");
+      } else {
+        setErrorMessage(err.message || 'Something went wrong. Please try again.');
+      }
     }
   }
 
@@ -121,6 +132,32 @@ export default function App() {
           <Leaf className="w-6 h-6" />
           <span className="font-semibold text-lg tracking-tight">Aura</span>
         </div>
+        {!user ? (
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => { setIsLogin(true); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }} 
+              className="text-slate-600 hover:text-slate-900 font-medium text-sm transition-colors"
+            >
+              Log In
+            </button>
+            <button 
+              onClick={() => { setIsLogin(false); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }} 
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium text-sm transition-all shadow-sm"
+            >
+              Sign Up
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-slate-600 hidden sm:inline-block">{user.email}</span>
+            <button 
+              onClick={handleSignOut} 
+              className="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* Main Content */}
@@ -144,6 +181,18 @@ export default function App() {
             <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
               Aura is a minimalist, distraction-free learning platform designed to help you focus, retain information, and enjoy the process. 
             </p>
+            <div className="pt-4 flex flex-col items-center space-y-3">
+              <a 
+                href="/AuraLearning.apk" 
+                download
+                className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-medium text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto"
+              >
+                Download App
+              </a>
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
+                The app is currently under development, so no complete books or videos are available in the app yet, in the next update all the books will be added.
+              </p>
+            </div>
           </motion.div>
 
           <motion.div 
@@ -164,19 +213,48 @@ export default function App() {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center space-y-4 py-6"
+                className="flex flex-col text-left space-y-6 py-2"
               >
-                <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center text-teal-600">
-                  <CheckCircle2 size={32} />
+                <div className="flex items-center space-x-4 border-b border-slate-100 pb-6">
+                  <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 text-2xl font-medium uppercase shadow-sm">
+                    {user.email?.charAt(0) || 'U'}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-medium text-slate-900">Your Profile</h3>
+                    <p className="text-slate-500">{user.email}</p>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-medium text-slate-900">Welcome, {user.email}!</h3>
-                <p className="text-slate-500">You are securely signed in.</p>
-                <button 
-                  onClick={handleSignOut}
-                  className="mt-4 px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors"
-                >
-                  Sign Out
-                </button>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-slate-50/80 rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <p className="text-sm text-slate-500 mb-1">Pre-registration Status</p>
+                    <div className="flex items-center space-x-2 text-teal-600 font-medium">
+                      <CheckCircle2 size={18} />
+                      <span>Active</span>
+                    </div>
+                  </div>
+                  <div className="bg-slate-50/80 rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <p className="text-sm text-slate-500 mb-1">Early Access</p>
+                    <div className="flex items-center space-x-2 text-blue-600 font-medium">
+                      <Star size={18} />
+                      <span>Tier 1 Member</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-teal-50/80 rounded-2xl p-5 border border-teal-100 shadow-sm">
+                  <h4 className="font-medium text-teal-900 mb-3 text-sm tracking-wide uppercase">Exclusive Updates</h4>
+                  <ul className="space-y-3 text-sm text-teal-800">
+                    <li className="flex items-start space-x-3">
+                      <div className="min-w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5" />
+                      <span>Aura is currently in closed beta. Watch your email for the next release wave.</span>
+                    </li>
+                    <li className="flex items-start space-x-3">
+                      <div className="min-w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5" />
+                      <span>Next week: Preview of the new distraction-free reading mode.</span>
+                    </li>
+                  </ul>
+                </div>
               </motion.div>
             ) : status === 'success' ? (
               <motion.div 
@@ -204,15 +282,28 @@ export default function App() {
                 </div>
                 
                 <form onSubmit={handleAuth} className="flex flex-col gap-4">
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email address"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-700 placeholder:text-slate-400"
-                    disabled={status === 'loading'}
-                  />
+                  <div className="space-y-1">
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEmail(val);
+                        if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                          setEmailError('Please enter a valid email address');
+                        } else {
+                          setEmailError('');
+                        }
+                      }}
+                      placeholder="Email address"
+                      className={`w-full px-4 py-3 rounded-xl border ${emailError ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 focus:ring-teal-500/20 focus:border-teal-500'} bg-white/80 focus:bg-white focus:outline-none focus:ring-2 transition-all text-slate-700 placeholder:text-slate-400`}
+                      disabled={status === 'loading'}
+                    />
+                    {emailError && (
+                      <p className="text-red-500 text-xs text-left pl-1">{emailError}</p>
+                    )}
+                  </div>
                   <input
                     type="password"
                     required
@@ -224,8 +315,8 @@ export default function App() {
                   />
                   <button
                     type="submit"
-                    disabled={status === 'loading'}
-                    className="w-full px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium transition-all shadow-md shadow-teal-500/20 flex items-center justify-center disabled:opacity-70 group"
+                    disabled={status === 'loading' || !!emailError}
+                    className="w-full px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium transition-all shadow-md shadow-teal-500/20 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed group"
                   >
                     {status === 'loading' ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
