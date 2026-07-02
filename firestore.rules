@@ -17,6 +17,20 @@ service cloud.firestore {
              (data.get('source', '') is string);
     }
 
+    match /books/{bookId} {
+      // Only authenticated users can read books
+      allow read: if request.auth != null;
+      // Only admin can write
+      allow write: if request.auth != null && request.auth.token.email == 'auracommunityact@gmail.com';
+    }
+
+    match /videos/{videoId} {
+      // Only authenticated users can read videos
+      allow read: if request.auth != null;
+      // Only admin can write
+      allow write: if request.auth != null && request.auth.token.email == 'auracommunityact@gmail.com';
+    }
+
     match /waitlist/{entryId} {
       // Anyone can create a waitlist entry if they follow the schema
       allow create: if isValidId(entryId) && isValidWaitlistEntry(request.resource.data);
