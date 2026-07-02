@@ -3,9 +3,8 @@ import { Countdown } from './components/Countdown';
 import { Chatbot } from './components/Chatbot';
 import { Leaf, ArrowRight, Loader2, CheckCircle2, Star, Mail, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { db, auth } from './lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { supabase } from './lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 import { ShareSection } from './components/ShareSection';
 import { ContentFeed } from './components/ContentFeed';
@@ -24,7 +23,12 @@ export default function App() {
   const isAdmin = user?.email === 'auracommunityact@gmail.com';
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
       setUser(currentUser);
       
       // Execute pending action if they just logged in
@@ -34,7 +38,8 @@ export default function App() {
         setIsAuthModalOpen(false);
       }
     });
-    return () => unsubscribe();
+
+    return () => subscription.unsubscribe();
   }, [pendingAction]);
 
   const triggerToast = (msg: string) => {
@@ -54,7 +59,7 @@ export default function App() {
   };
 
   async function handleSignOut() {
-    await signOut(auth);
+    await supabase.auth.signOut();
     setUser(null);
   }
 

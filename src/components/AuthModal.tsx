@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, X, Loader2 } from 'lucide-react';
-import { auth, db } from '../lib/firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -32,20 +30,11 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'login' }:
 
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
       } else {
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-        await sendEmailVerification(result.user);
-        
-        try {
-          await addDoc(collection(db, 'waitlist'), {
-            email: result.user.email,
-            createdAt: serverTimestamp(),
-            source: 'email_password'
-          });
-        } catch (dbError) {
-          console.error("Firestore error:", dbError);
-        }
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
       }
       setStatus('idle');
       setEmail('');

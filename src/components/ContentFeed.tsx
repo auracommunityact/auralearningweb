@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Play, BookOpen, Lock } from 'lucide-react';
-import { User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 
 interface ContentItem {
   id: string;
