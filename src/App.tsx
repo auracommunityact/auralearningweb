@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Countdown } from './components/Countdown';
 import { Chatbot } from './components/Chatbot';
-import { Leaf, ArrowRight, Twitter, Facebook, Linkedin, Loader2, CheckCircle2, Star } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Leaf, ArrowRight, Twitter, Facebook, Linkedin, Loader2, CheckCircle2, Star, Mail } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { db, auth } from './lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 
 const provider = new GoogleAuthProvider();
 provider.addScope('https://www.googleapis.com/auth/classroom.courses.readonly');
@@ -20,6 +20,8 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [user, setUser] = useState<User | null>(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -98,6 +100,7 @@ export default function App() {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
         const result = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(result.user);
         
         // Save to waitlist collection for consistency
         try {
@@ -109,6 +112,10 @@ export default function App() {
         } catch (dbError) {
           console.error("Firestore error:", dbError);
         }
+
+        setToastMessage(`Registration email sent to ${result.user.email}. Please verify your inbox.`);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 5000);
       }
       setStatus('success');
       setEmail('');
@@ -420,6 +427,20 @@ export default function App() {
 
         </div>
       </main>
+
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full shadow-xl flex items-center space-x-3 z-50 max-w-[90vw] text-sm font-medium"
+          >
+            <Mail className="w-5 h-5 text-teal-400" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Chatbot />
     </div>
