@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Countdown } from './components/Countdown';
 import { Chatbot } from './components/Chatbot';
-import { Leaf, ArrowRight, Loader2, CheckCircle2, Star, Mail, ShieldAlert } from 'lucide-react';
+import { Leaf, ArrowRight, Loader2, CheckCircle2, Star, Mail, ShieldAlert, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from './lib/supabase';
 import { User } from '@supabase/supabase-js';
 
 import { ShareSection } from './components/ShareSection';
-import { ContentFeed } from './components/ContentFeed';
 import { AuthModal } from './components/AuthModal';
+import { Sidebar } from './components/Sidebar';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  
+  // Sidebar State
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Auth Modal & Interception State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -71,38 +74,13 @@ export default function App() {
           <Leaf className="w-6 h-6" />
           <span className="font-semibold text-lg tracking-tight">Aura</span>
         </div>
-        {!user ? (
-          <div className="flex items-center space-x-4">
-            <button 
-              onClick={() => { setAuthModalMode('login'); setIsAuthModalOpen(true); }} 
-              className="text-slate-600 hover:text-slate-900 font-medium text-sm transition-colors"
-            >
-              Log In
-            </button>
-            <button 
-              onClick={() => { setAuthModalMode('signup'); setIsAuthModalOpen(true); }} 
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium text-sm transition-all shadow-sm"
-            >
-              Sign Up
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-4">
-            {isAdmin && (
-              <span className="flex items-center space-x-1 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full border border-amber-200">
-                <ShieldAlert size={14} />
-                <span>Admin</span>
-              </span>
-            )}
-            <span className="text-sm text-slate-600 hidden sm:inline-block">{user.email}</span>
-            <button 
-              onClick={handleSignOut} 
-              className="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors"
-            >
-              Sign Out
-            </button>
-          </div>
-        )}
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="p-2 -mr-2 text-slate-600 hover:text-slate-900 transition-colors rounded-full hover:bg-slate-100"
+          aria-label="Open Menu"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
       </nav>
 
       {/* Main Content */}
@@ -128,17 +106,22 @@ export default function App() {
             </p>
           </motion.div>
 
-          {/* Guest Feed & Content Gate */}
-          <ContentFeed 
-            user={user} 
-            onRequireAuth={requireAuth}
-            onShowToast={triggerToast}
-          />
-
-          <ShareSection onShowToast={triggerToast} />
-
         </div>
       </main>
+
+      {/* Sidebar */}
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        user={user}
+        isAdmin={isAdmin}
+        onSignOut={handleSignOut}
+        onShowToast={triggerToast}
+        onOpenAuth={(mode) => {
+          setAuthModalMode(mode);
+          setIsAuthModalOpen(true);
+        }}
+      />
 
       {/* Auth Modal & Toast */}
       <AuthModal 
