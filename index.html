@@ -1,13 +1,399 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Learning - Transform Your Education Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .accordion-content { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; max-height: 0; opacity: 0; overflow: hidden; }
+        .accordion-content.open { max-height: 500px; opacity: 1; }
+        .modal { transition: opacity 0.3s ease-out; opacity: 0; pointer-events: none; }
+        .modal.open { opacity: 1; pointer-events: auto; }
+        .modal-content { transition: transform 0.3s ease-out; transform: translateY(20px) scale(0.95); }
+        .modal.open .modal-content { transform: translateY(0) scale(1); }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        indigo: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81', 950: '#1e1b4b' },
+                        violet: { 500: '#8b5cf6', 600: '#7c3aed' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Dark Mode Initializer to prevent FOUC -->
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 antialiased selection:bg-indigo-200 dark:selection:bg-indigo-900 selection:text-indigo-900 dark:selection:text-indigo-200 transition-colors duration-300">
 
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <img src="https://placehold.co/100x100/4f46e5/ffffff?text=A" alt="Aura Learning Logo" class="w-8 h-8 rounded-lg object-cover shadow-sm">
+                    <span class="font-bold text-xl tracking-tight text-indigo-950 dark:text-white transition-colors duration-300">Aura Learning</span>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <button id="theme-toggle" class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none" aria-label="Toggle dark mode">
+                        <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="document.getElementById('download').scrollIntoView({ behavior: 'smooth' });" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-md shadow-indigo-200 dark:shadow-none">
+                        Download Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden pt-16 pb-32 lg:pt-24 lg:pb-40 bg-gradient-to-br from-white via-indigo-50/50 to-violet-100/50 dark:from-slate-950 dark:via-indigo-950/30 dark:to-violet-950/30 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+                <div class="text-center lg:text-left mb-16 lg:mb-0">
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight transition-colors duration-300">
+                        Transform Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500 dark:from-indigo-400 dark:to-violet-400">Education Journey</span> with Aura Learning
+                    </h1>
+                    <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto lg:mx-0 transition-colors duration-300">
+                        Experience a personalized, smart learning application designed to adapt to your unique pace and goals. Your ultimate companion for continuous growth.
+                    </p>
+                    <div id="download" class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+                        <button class="flex items-center justify-center gap-3 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 px-6 py-3.5 rounded-xl font-medium transition-transform hover:scale-105 active:scale-95 shadow-xl dark:shadow-none">
+                            <i data-lucide="download" class="w-6 h-6"></i>
+                            <div class="text-left">
+                                <div class="text-xs opacity-80 dark:opacity-70">GET IT ON</div>
+                                <div class="text-sm font-semibold leading-none mt-0.5">Google Play</div>
+                            </div>
+                        </button>
+                        <button class="flex items-center justify-center gap-3 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 px-6 py-3.5 rounded-xl font-medium transition-transform hover:scale-105 active:scale-95 shadow-xl dark:shadow-none">
+                            <i data-lucide="download" class="w-6 h-6"></i>
+                            <div class="text-left">
+                                <div class="text-xs opacity-80 dark:opacity-70">Download on the</div>
+                                <div class="text-sm font-semibold leading-none mt-0.5">App Store</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative mx-auto w-full max-w-sm lg:max-w-md">
+                    <div class="relative aspect-[9/19] bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl border-[10px] border-slate-900 dark:border-slate-800 overflow-hidden transition-colors duration-300">
+                        <!-- Mockup Screen Notch -->
+                        <div class="absolute top-0 inset-x-0 h-6 bg-slate-900 dark:bg-slate-800 rounded-b-2xl w-32 mx-auto z-20 transition-colors duration-300"></div>
+                        <!-- Mockup Content -->
+                        <div class="h-full w-full bg-slate-50 dark:bg-slate-950 flex flex-col relative transition-colors duration-300">
+                            <!-- Placeholder App Image -->
+                            <div class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                                <div class="w-16 h-16 bg-gradient-to-br from-indigo-600 to-violet-500 dark:from-indigo-500 dark:to-violet-400 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mb-4 shadow-lg shadow-indigo-200 dark:shadow-none">
+                                    A
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 transition-colors duration-300">Aura Learning</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-8 transition-colors duration-300">App Screenshot Placeholder</p>
+                                
+                                <div class="w-full space-y-3">
+                                    <div class="h-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm w-full border border-slate-100 dark:border-slate-800 transition-colors duration-300"></div>
+                                    <div class="h-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm w-full border border-slate-100 dark:border-slate-800 transition-colors duration-300"></div>
+                                    <div class="h-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm w-full border border-slate-100 dark:border-slate-800 transition-colors duration-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Decorative background blur elements -->
+                    <div class="absolute -top-10 -right-10 w-48 h-48 bg-violet-400 dark:bg-violet-600 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-30 dark:opacity-20 transition-all duration-300"></div>
+                    <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-indigo-400 dark:bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-30 dark:opacity-20 transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features Section -->
+    <section class="py-24 bg-white dark:bg-slate-950 relative z-20 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4 transition-colors duration-300">Why Choose Aura Learning?</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto transition-colors duration-300">Built with modern learners in mind, prioritizing your privacy and experience.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 hover:shadow-xl dark:hover:shadow-slate-900/50 transition-all duration-300">
+                    <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+                        <i data-lucide="user" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 transition-colors duration-300">Personalized Profile</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">
+                        Custom avatar and name settings saved securely on your device. Tailor your learning identity.
+                    </p>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 hover:shadow-xl dark:hover:shadow-slate-900/50 transition-all duration-300">
+                    <div class="w-14 h-14 bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+                        <i data-lucide="cloud-upload" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 transition-colors duration-300">Quick Upload Sync</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">
+                        Instantly check and track your uploads with our dedicated web link. Always stay organized.
+                    </p>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 hover:shadow-xl dark:hover:shadow-slate-900/50 transition-all duration-300">
+                    <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+                        <i data-lucide="shield" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 transition-colors duration-300">Privacy First</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">
+                        Your local data stays entirely on your device until you delete the app. We respect your digital boundaries.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQs Section -->
+    <section class="py-24 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-900 transition-colors duration-300">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4 transition-colors duration-300">Frequently Asked Questions</h2>
+            </div>
+            <div class="space-y-4">
+                <!-- FAQ 1 -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden faq-item transition-colors duration-300">
+                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none group" onclick="toggleFaq(this)">
+                        <span class="font-semibold text-slate-900 dark:text-slate-100 text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Is Aura Learning free to use?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 dark:text-slate-500 chevron transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="px-6 pb-5 text-slate-600 dark:text-slate-400 transition-colors duration-300">
+                            Yes, Aura Learning is completely free to download and use with all core features available immediately.
+                        </div>
+                    </div>
+                </div>
+                <!-- FAQ 2 -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden faq-item transition-colors duration-300">
+                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none group" onclick="toggleFaq(this)">
+                        <span class="font-semibold text-slate-900 dark:text-slate-100 text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Where is my profile data stored?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 dark:text-slate-500 chevron transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="px-6 pb-5 text-slate-600 dark:text-slate-400 transition-colors duration-300">
+                            Completely offline on your local device for maximum privacy.
+                        </div>
+                    </div>
+                </div>
+                <!-- FAQ 3 -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden faq-item transition-colors duration-300">
+                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none group" onclick="toggleFaq(this)">
+                        <span class="font-semibold text-slate-900 dark:text-slate-100 text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">How do I check my uploads?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 dark:text-slate-500 chevron transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="px-6 pb-5 text-slate-600 dark:text-slate-400 transition-colors duration-300">
+                            You can check and track your uploads instantly by navigating to the 'Sync' tab inside the app or using your dedicated personal web link.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-slate-900 dark:bg-slate-950 text-slate-300 py-12 lg:py-16 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <img src="https://placehold.co/100x100/4f46e5/ffffff?text=A" alt="Aura Learning Logo" class="w-8 h-8 rounded-lg object-cover">
+                        <span class="font-bold text-xl text-white tracking-tight">Aura Learning</span>
+                    </div>
+                    <p class="text-slate-400 text-sm max-w-sm mb-6">
+                        Transforming the education journey with personalized, privacy-first mobile learning solutions.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                        <a href="#" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                        <a href="#" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-6 uppercase tracking-wider text-sm">Contact Us</h4>
+                    <div class="flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
+                        <i data-lucide="mail" class="w-5 h-5"></i>
+                        <a href="mailto:support@auralearning.com">support@auralearning.com</a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-semibold mb-6 uppercase tracking-wider text-sm">Legal</h4>
+                    <ul class="space-y-3 text-slate-400">
+                        <li>
+                            <button onclick="openModal('privacy-modal')" class="hover:text-white transition-colors">Privacy Policy</button>
+                        </li>
+                        <li>
+                            <button onclick="openModal('terms-modal')" class="hover:text-white transition-colors">Terms of Use</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-800 dark:border-slate-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+                <p>&copy; <span id="year"></span> Aura Learning. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="modal fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col transition-colors duration-300" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-3xl transition-colors duration-300">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Privacy Policy</h3>
+                <button onclick="closeModal('privacy-modal')" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 text-slate-600 dark:text-slate-400 space-y-4">
+                <p class="text-sm font-medium text-slate-500">Last updated: July 2026</p>
+                
+                <h4 class="font-semibold text-slate-900 dark:text-white mt-4">1. Information Collection</h4>
+                <p>Your privacy is our priority. Aura Learning stores your personal data locally on your device. We do not transmit your local profile data to our servers unless explicitly requested by you via our sync features.</p>
+                
+                <h4 class="font-semibold text-slate-900 dark:text-white mt-4">2. Data Usage</h4>
+                <p>The information collected locally is used solely to enhance your personalized learning experience and track your progress within the app.</p>
+
+                <h4 class="font-semibold text-slate-900 dark:text-white mt-4">3. Data Retention</h4>
+                <p>Your local data stays entirely on your device until you delete the app or manually clear your application data.</p>
+                
+                <p class="mt-8 text-sm">For any questions regarding these terms, please contact us at support@auralearning.com</p>
+            </div>
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 rounded-b-3xl flex justify-end transition-colors duration-300">
+                <button onclick="closeModal('privacy-modal')" class="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-6 py-2.5 rounded-full font-medium transition-colors">
+                    I Understand
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Use Modal -->
+    <div id="terms-modal" class="modal fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col transition-colors duration-300" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-3xl transition-colors duration-300">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Terms of Use</h3>
+                <button onclick="closeModal('terms-modal')" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 text-slate-600 dark:text-slate-400 space-y-4">
+                <p class="text-sm font-medium text-slate-500">Last updated: July 2026</p>
+                
+                <h4 class="font-semibold text-slate-900 dark:text-white mt-4">1. Acceptance of Terms</h4>
+                <p>By downloading or using the Aura Learning app, you agree to be bound by these Terms of Use. If you disagree with any part of the terms, you may not access the service.</p>
+
+                <h4 class="font-semibold text-slate-900 dark:text-white mt-4">2. Use License</h4>
+                <p>Permission is granted to temporarily download one copy of the materials (information or software) on Aura Learning for personal, non-commercial transitory viewing only.</p>
+
+                <h4 class="font-semibold text-slate-900 dark:text-white mt-4">3. Disclaimer</h4>
+                <p>The materials within Aura Learning are provided on an 'as is' basis. We make no warranties, expressed or implied, and hereby disclaim and negate all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.</p>
+                
+                <p class="mt-8 text-sm">For any questions regarding these terms, please contact us at support@auralearning.com</p>
+            </div>
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 rounded-b-3xl flex justify-end transition-colors duration-300">
+                <button onclick="closeModal('terms-modal')" class="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-6 py-2.5 rounded-full font-medium transition-colors">
+                    I Understand
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Set initial icon based on theme
+        const currentThemeIcon = document.getElementById('theme-icon');
+        if (document.documentElement.classList.contains('dark')) {
+            currentThemeIcon.setAttribute('data-lucide', 'sun');
+        } else {
+            currentThemeIcon.setAttribute('data-lucide', 'moon');
+        }
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Theme Toggle Logic
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        
+        themeToggleBtn.addEventListener('click', function() {
+            // toggle icons inside button
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+                currentThemeIcon.setAttribute('data-lucide', 'moon');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+                currentThemeIcon.setAttribute('data-lucide', 'sun');
+            }
+            // Re-render lucide icons to apply new icon
+            lucide.createIcons();
+        });
+
+        // Set current year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // FAQ Toggle
+        function toggleFaq(button) {
+            const content = button.nextElementSibling;
+            const chevron = button.querySelector('.chevron');
+            const isOpen = content.classList.contains('open');
+
+            // Close all FAQs
+            document.querySelectorAll('.accordion-content').forEach(el => {
+                el.classList.remove('open');
+            });
+            document.querySelectorAll('.chevron').forEach(el => {
+                el.classList.remove('rotate-180', 'text-indigo-600', 'dark:text-indigo-400');
+                el.classList.add('text-slate-400', 'dark:text-slate-500');
+            });
+
+            // Open clicked FAQ if it wasn't open
+            if (!isOpen) {
+                content.classList.add('open');
+                chevron.classList.add('rotate-180', 'text-indigo-600', 'dark:text-indigo-400');
+                chevron.classList.remove('text-slate-400', 'dark:text-slate-500');
+            }
+        }
+
+        // Modals
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal(this.id);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
