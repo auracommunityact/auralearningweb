@@ -20,6 +20,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -29,6 +31,10 @@
         .modal.open { opacity: 1; pointer-events: auto; }
         .modal-content { transition: transform 0.3s ease-out; transform: translateY(20px) scale(0.95); }
         .modal.open .modal-content { transform: translateY(0) scale(1); }
+        .sidebar { transform: translateX(100%); transition: transform 0.3s ease-in-out; }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; }
+        .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
     </style>
     <script>
         tailwind.config = {
@@ -66,10 +72,109 @@
                     <button id="theme-toggle" class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none" aria-label="Toggle dark mode">
                         <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
                     </button>
+                    <button id="mobile-menu-btn" class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none" aria-label="Open menu">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed top-0 right-0 h-full w-80 max-w-[80vw] bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 z-50 shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
+            <span class="font-bold text-lg text-slate-900 dark:text-white">Menu</span>
+            <button id="close-sidebar-btn" class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none" aria-label="Close menu">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        
+        <div class="p-6 flex-1 overflow-y-auto flex flex-col">
+            <!-- Logged In View -->
+            <div id="auth-logged-in" class="hidden flex-col h-full">
+                <div class="flex items-center gap-4 mb-8 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xl shrink-0">
+                        <i data-lucide="user" class="w-6 h-6"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h4 class="font-semibold text-slate-900 dark:text-white truncate">Welcome back</h4>
+                        <p id="user-email-display" class="text-sm text-slate-500 dark:text-slate-400 truncate">user@example.com</p>
+                    </div>
+                </div>
+                
+                <div class="mt-auto">
+                    <button id="btn-logout" class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="log-out" class="w-5 h-5"></i> Log Out
+                    </button>
+                </div>
+            </div>
+
+            <!-- Logged Out View -->
+            <div id="auth-logged-out" class="flex flex-col h-full">
+                <!-- Auth Message Container -->
+                <div id="auth-message" class="hidden mb-4 p-3 rounded-xl text-sm font-medium"></div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-4 flex flex-col flex-1">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Log In</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Welcome back to Aura Learning</p>
+                    </div>
+                    
+                    <div class="space-y-4 flex-1">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                            <input type="email" id="login-email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                            <input type="password" id="login-password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-login-submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2">
+                        <span id="login-text">Log In</span>
+                        <i data-lucide="loader-2" id="login-spinner" class="w-5 h-5 animate-spin hidden"></i>
+                    </button>
+                    
+                    <div class="text-center mt-4">
+                        <button type="button" onclick="toggleAuthMode('signup')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Don't have an account? Sign Up</button>
+                    </div>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signup-form" class="hidden space-y-4 flex flex-col flex-1">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Sign Up</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Create your Aura Learning account</p>
+                    </div>
+
+                    <div class="space-y-4 flex-1">
+                        <div>
+                            <label for="signup-email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                            <input type="email" id="signup-email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label for="signup-password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                            <input type="password" id="signup-password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-signup-submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2">
+                        <span id="signup-text">Sign Up</span>
+                        <i data-lucide="loader-2" id="signup-spinner" class="w-5 h-5 animate-spin hidden"></i>
+                    </button>
+
+                    <div class="text-center mt-4">
+                        <button type="button" onclick="toggleAuthMode('login')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Already have an account? Log In</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </aside>
 
     <!-- Hero Section -->
     <section class="relative overflow-hidden pt-16 pb-32 lg:pt-24 lg:pb-40 bg-gradient-to-br from-white via-indigo-50/50 to-violet-100/50 dark:from-slate-950 dark:via-indigo-950/30 dark:to-violet-950/30 transition-colors duration-300">
@@ -234,44 +339,42 @@
     <footer class="bg-slate-900 dark:bg-slate-950 text-slate-300 py-12 lg:py-16 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <!-- Section 1 -->
                 <div>
                     <div class="flex items-center gap-3 mb-6">
                         <img src="https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png" alt="Aura Learning Logo" class="h-8 w-auto object-contain">
                         <span class="font-bold text-xl text-white tracking-tight">Aura Learning</span>
                     </div>
-                    <p class="text-slate-400 text-sm max-w-sm mb-6">
+                    <p class="text-slate-400 text-sm max-w-sm">
                         Transforming the education journey with personalized, privacy-first mobile learning solutions.
                     </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a>
-                        <a href="#" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a>
-                        <a href="#" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
-                    </div>
                 </div>
                 
+                <!-- Section 2 -->
                 <div>
                     <h4 class="text-white font-semibold mb-6 uppercase tracking-wider text-sm">Contact Us</h4>
                     <div class="flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
-                        <i data-lucide="mail" class="w-5 h-5"></i>
-                        <a href="mailto:support@auralearning.com">support@auralearning.com</a>
+                        <a href="mailto:auralearning.help@gmail.com" class="hover:text-indigo-400 transition-colors">auralearning.help@gmail.com</a>
                     </div>
                 </div>
 
+                <!-- Section 3 -->
                 <div>
                     <h4 class="text-white font-semibold mb-6 uppercase tracking-wider text-sm">Legal</h4>
                     <ul class="space-y-3 text-slate-400">
                         <li>
-                            <button onclick="openModal('privacy-modal')" class="hover:text-white transition-colors">Privacy Policy</button>
+                            <button onclick="openModal('privacy-modal')" class="hover:text-white transition-colors text-left">Privacy Policy</button>
                         </li>
                         <li>
-                            <button onclick="openModal('terms-modal')" class="hover:text-white transition-colors">Terms of Use</button>
+                            <button onclick="openModal('terms-modal')" class="hover:text-white transition-colors text-left">Terms of Use</button>
                         </li>
                     </ul>
                 </div>
             </div>
             
-            <div class="border-t border-slate-800 dark:border-slate-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-                <p>&copy; <span id="year"></span> Aura Learning. All rights reserved.</p>
+            <!-- Bottom Copyright Bar -->
+            <div class="border-t border-slate-800 dark:border-slate-800/50 pt-8 flex text-sm text-slate-500 justify-center text-center">
+                <p>&copy; 2026 Aura Learning. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -370,8 +473,35 @@
             lucide.createIcons();
         });
 
+        // Sidebar Logic
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        if (mobileMenuBtn && closeSidebarBtn && sidebarOverlay) {
+            mobileMenuBtn.addEventListener('click', openSidebar);
+            closeSidebarBtn.addEventListener('click', closeSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
+        }
+
         // Set current year
-        document.getElementById('year').textContent = new Date().getFullYear();
+        const yearElement = document.getElementById('year');
+        if (yearElement) {
+            yearElement.textContent = new Date().getFullYear();
+        }
 
         // FAQ Toggle
         function toggleFaq(button) {
@@ -446,6 +576,158 @@
         // Initialize and set interval
         updateCountdown();
         setInterval(updateCountdown, 1000);
+
+        // Supabase Setup
+        const SUPABASE_URL = 'https://qxoqflrqpwlythgqmjtq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4b3FmbHJxcHdseXRoZ3FtanRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxODIxMTQsImV4cCI6MjA5Nzc1ODExNH0.cJ3hIsEyRtH1m_nmyzwjrdvzsbGIKIiChnmXAjgFRfo';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Auth UI Elements
+        const authLoggedIn = document.getElementById('auth-logged-in');
+        const authLoggedOut = document.getElementById('auth-logged-out');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const authMessage = document.getElementById('auth-message');
+        const btnLogout = document.getElementById('btn-logout');
+
+        // Login Spinners/Text
+        const loginText = document.getElementById('login-text');
+        const loginSpinner = document.getElementById('login-spinner');
+        const btnLoginSubmit = document.getElementById('btn-login-submit');
+
+        // Signup Spinners/Text
+        const signupText = document.getElementById('signup-text');
+        const signupSpinner = document.getElementById('signup-spinner');
+        const btnSignupSubmit = document.getElementById('btn-signup-submit');
+
+        // Toggle Auth Forms (Login / Signup)
+        function toggleAuthMode(mode) {
+            clearAuthMessage();
+            if (mode === 'signup') {
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+            } else {
+                signupForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            }
+        }
+
+        function showAuthMessage(message, isError = false) {
+            authMessage.textContent = message;
+            authMessage.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'bg-green-50', 'text-green-600', 'dark:bg-red-900/30', 'dark:text-red-400', 'dark:bg-green-900/30', 'dark:text-green-400');
+            
+            if (isError) {
+                authMessage.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/30', 'dark:text-red-400');
+            } else {
+                authMessage.classList.add('bg-green-50', 'text-green-600', 'dark:bg-green-900/30', 'dark:text-green-400');
+            }
+        }
+
+        function clearAuthMessage() {
+            authMessage.classList.add('hidden');
+            authMessage.textContent = '';
+        }
+
+        function setLoadingState(type, isLoading) {
+            if (type === 'login') {
+                if (isLoading) {
+                    loginText.classList.add('hidden');
+                    loginSpinner.classList.remove('hidden');
+                    btnLoginSubmit.disabled = true;
+                    btnLoginSubmit.classList.add('opacity-70', 'cursor-not-allowed');
+                } else {
+                    loginText.classList.remove('hidden');
+                    loginSpinner.classList.add('hidden');
+                    btnLoginSubmit.disabled = false;
+                    btnLoginSubmit.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
+            } else if (type === 'signup') {
+                if (isLoading) {
+                    signupText.classList.add('hidden');
+                    signupSpinner.classList.remove('hidden');
+                    btnSignupSubmit.disabled = true;
+                    btnSignupSubmit.classList.add('opacity-70', 'cursor-not-allowed');
+                } else {
+                    signupText.classList.remove('hidden');
+                    signupSpinner.classList.add('hidden');
+                    btnSignupSubmit.disabled = false;
+                    btnSignupSubmit.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
+            }
+        }
+
+        // Handle Signup
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearAuthMessage();
+            setLoadingState('signup', true);
+            
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+            });
+
+            setLoadingState('signup', false);
+
+            if (error) {
+                showAuthMessage(error.message, true);
+            } else {
+                showAuthMessage('Success! Check your email for confirmation.', false);
+                signupForm.reset();
+            }
+        });
+
+        // Handle Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearAuthMessage();
+            setLoadingState('login', true);
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            setLoadingState('login', false);
+
+            if (error) {
+                showAuthMessage(error.message, true);
+            } else {
+                loginForm.reset();
+            }
+        });
+
+        // Handle Logout
+        btnLogout.addEventListener('click', async () => {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+                console.error('Error logging out:', error.message);
+            }
+        });
+
+        // Listen to Auth State Changes
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (session && session.user) {
+                // User is logged in
+                authLoggedOut.classList.add('hidden');
+                authLoggedIn.classList.remove('hidden');
+                userEmailDisplay.textContent = session.user.email;
+            } else {
+                // User is logged out
+                authLoggedIn.classList.add('hidden');
+                authLoggedOut.classList.remove('hidden');
+                userEmailDisplay.textContent = '';
+                toggleAuthMode('login'); // Reset to login view
+            }
+        });
+
     </script>
 </body>
 </html>
