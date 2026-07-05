@@ -140,10 +140,22 @@ async function startServer() {
       server: { middlewareMode: true },
       appType: "spa",
     });
+    
+    // Explicitly handle /sitemap in dev mode
+    app.get('/sitemap', (req, res) => {
+      res.redirect('/sitemap.xml');
+    });
+    
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
+    
+    // Explicitly handle /sitemap to redirect to /sitemap.xml
+    app.get('/sitemap', (req, res) => {
+      res.redirect('/sitemap.xml');
+    });
+
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
