@@ -59,15 +59,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center gap-3">
-                    <img src="https://placehold.co/100x100/4f46e5/ffffff?text=A" alt="Aura Learning Logo" class="w-8 h-8 rounded-lg object-cover shadow-sm">
+                    <img src="https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png" alt="Aura Learning Logo" class="h-10 w-auto object-contain">
                     <span class="font-bold text-xl tracking-tight text-indigo-950 dark:text-white transition-colors duration-300">Aura Learning</span>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="theme-toggle" class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none" aria-label="Toggle dark mode">
                         <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
-                    </button>
-                    <button onclick="document.getElementById('download').scrollIntoView({ behavior: 'smooth' });" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-md shadow-indigo-200 dark:shadow-none">
-                        Download Now
                     </button>
                 </div>
             </div>
@@ -85,21 +82,32 @@
                     <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto lg:mx-0 transition-colors duration-300">
                         Experience a personalized, smart learning application designed to adapt to your unique pace and goals. Your ultimate companion for continuous growth.
                     </p>
-                    <div id="download" class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
-                        <button class="flex items-center justify-center gap-3 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 px-6 py-3.5 rounded-xl font-medium transition-transform hover:scale-105 active:scale-95 shadow-xl dark:shadow-none">
-                            <i data-lucide="download" class="w-6 h-6"></i>
-                            <div class="text-left">
-                                <div class="text-xs opacity-80 dark:opacity-70">GET IT ON</div>
-                                <div class="text-sm font-semibold leading-none mt-0.5">Google Play</div>
+                    <div class="mt-8 text-center lg:text-left">
+                        <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Aura Learning App Coming Soon</h3>
+                        <p class="text-indigo-600 dark:text-indigo-400 font-medium mb-6 text-sm sm:text-base">12:00 PM, Tuesday, February 2, 2027</p>
+                        
+                        <div class="flex flex-wrap justify-center lg:justify-start gap-3 sm:gap-4">
+                            <!-- Days -->
+                            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 sm:p-5 min-w-[80px] sm:min-w-[100px] border border-slate-200/50 dark:border-white/5 shadow-xl dark:shadow-none">
+                                <div id="cd-days" class="text-3xl sm:text-4xl font-black text-slate-800 dark:text-white mb-1 tabular-nums tracking-tighter">00</div>
+                                <div class="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-indigo-300/80 uppercase tracking-widest">Days</div>
                             </div>
-                        </button>
-                        <button class="flex items-center justify-center gap-3 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 px-6 py-3.5 rounded-xl font-medium transition-transform hover:scale-105 active:scale-95 shadow-xl dark:shadow-none">
-                            <i data-lucide="download" class="w-6 h-6"></i>
-                            <div class="text-left">
-                                <div class="text-xs opacity-80 dark:opacity-70">Download on the</div>
-                                <div class="text-sm font-semibold leading-none mt-0.5">App Store</div>
+                            <!-- Hours -->
+                            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 sm:p-5 min-w-[80px] sm:min-w-[100px] border border-slate-200/50 dark:border-white/5 shadow-xl dark:shadow-none">
+                                <div id="cd-hours" class="text-3xl sm:text-4xl font-black text-slate-800 dark:text-white mb-1 tabular-nums tracking-tighter">00</div>
+                                <div class="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-indigo-300/80 uppercase tracking-widest">Hours</div>
                             </div>
-                        </button>
+                            <!-- Minutes -->
+                            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 sm:p-5 min-w-[80px] sm:min-w-[100px] border border-slate-200/50 dark:border-white/5 shadow-xl dark:shadow-none">
+                                <div id="cd-minutes" class="text-3xl sm:text-4xl font-black text-slate-800 dark:text-white mb-1 tabular-nums tracking-tighter">00</div>
+                                <div class="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-indigo-300/80 uppercase tracking-widest">Minutes</div>
+                            </div>
+                            <!-- Seconds -->
+                            <div class="bg-indigo-50/80 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 sm:p-5 min-w-[80px] sm:min-w-[100px] border border-indigo-200 dark:border-indigo-500/20 shadow-xl shadow-indigo-100 dark:shadow-[0_8px_32px_rgba(79,70,229,0.2)]">
+                                <div id="cd-seconds" class="text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400 mb-1 tabular-nums tracking-tighter">00</div>
+                                <div class="text-[10px] sm:text-xs font-semibold text-indigo-600/80 dark:text-indigo-300/80 uppercase tracking-widest">Seconds</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="relative mx-auto w-full max-w-sm lg:max-w-md">
@@ -128,55 +136,6 @@
                     <!-- Decorative background blur elements -->
                     <div class="absolute -top-10 -right-10 w-48 h-48 bg-violet-400 dark:bg-violet-600 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-30 dark:opacity-20 transition-all duration-300"></div>
                     <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-indigo-400 dark:bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-30 dark:opacity-20 transition-all duration-300"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Coming Soon Section -->
-    <section class="py-20 bg-slate-900 dark:bg-slate-950 relative overflow-hidden transition-colors duration-300 border-y border-slate-800">
-        <!-- Abstract Background Pattern -->
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiM0ZjQ2ZTUiIGZpbGwtb3BhY2l0eT0iMC4xNSIvPjwvc3ZnPg==')] opacity-40"></div>
-        
-        <!-- Glowing Orbs for extra depth -->
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full mix-blend-screen filter blur-[100px] opacity-50"></div>
-        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/20 rounded-full mix-blend-screen filter blur-[100px] opacity-50"></div>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4 drop-shadow-sm">Aura Learning App Coming Soon</h2>
-            <p class="text-indigo-200 dark:text-indigo-300/80 font-medium mb-12 text-lg sm:text-xl tracking-wide">12:00 PM, Tuesday, February 2, 2027</p>
-            
-            <div class="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8">
-                <!-- Days -->
-                <div class="bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-3xl p-5 sm:p-7 min-w-[110px] sm:min-w-[140px] border border-white/10 dark:border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-                    <div id="cd-days" class="text-5xl sm:text-6xl font-black text-white mb-3 tabular-nums tracking-tighter drop-shadow-md">00</div>
-                    <div class="text-xs sm:text-sm font-semibold text-indigo-300/80 uppercase tracking-[0.2em]">Days</div>
-                </div>
-                <!-- Hours -->
-                <div class="bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-3xl p-5 sm:p-7 min-w-[110px] sm:min-w-[140px] border border-white/10 dark:border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-                    <div id="cd-hours" class="text-5xl sm:text-6xl font-black text-white mb-3 tabular-nums tracking-tighter drop-shadow-md">00</div>
-                    <div class="text-xs sm:text-sm font-semibold text-indigo-300/80 uppercase tracking-[0.2em]">Hours</div>
-                </div>
-                <!-- Minutes -->
-                <div class="bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-3xl p-5 sm:p-7 min-w-[110px] sm:min-w-[140px] border border-white/10 dark:border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-                    <div id="cd-minutes" class="text-5xl sm:text-6xl font-black text-white mb-3 tabular-nums tracking-tighter drop-shadow-md">00</div>
-                    <div class="text-xs sm:text-sm font-semibold text-indigo-300/80 uppercase tracking-[0.2em]">Minutes</div>
-                </div>
-                <!-- Seconds -->
-                <div class="bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-3xl p-5 sm:p-7 min-w-[110px] sm:min-w-[140px] border border-indigo-500/30 dark:border-indigo-500/20 shadow-[0_8px_32px_rgba(79,70,229,0.2)]">
-                    <div id="cd-seconds" class="text-5xl sm:text-6xl font-black text-indigo-400 dark:text-indigo-300 mb-3 tabular-nums tracking-tighter drop-shadow-lg">00</div>
-                    <div class="text-xs sm:text-sm font-semibold text-indigo-300/80 uppercase tracking-[0.2em]">Seconds</div>
-                </div>
-            </div>
-            
-            <!-- Optional Notification CTA -->
-            <div class="mt-12 max-w-md mx-auto">
-                <div class="relative group">
-                    <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
-                    <button class="relative w-full flex items-center justify-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-full font-semibold hover:bg-slate-800 transition-colors">
-                        <i data-lucide="bell" class="w-5 h-5 text-indigo-400"></i>
-                        Notify me when it's ready
-                    </button>
                 </div>
             </div>
         </div>
@@ -277,7 +236,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
                 <div>
                     <div class="flex items-center gap-3 mb-6">
-                        <img src="https://placehold.co/100x100/4f46e5/ffffff?text=A" alt="Aura Learning Logo" class="w-8 h-8 rounded-lg object-cover">
+                        <img src="https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png" alt="Aura Learning Logo" class="h-8 w-auto object-contain">
                         <span class="font-bold text-xl text-white tracking-tight">Aura Learning</span>
                     </div>
                     <p class="text-slate-400 text-sm max-w-sm mb-6">
