@@ -3,72 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura Learning - Admin Panel</title>
+    <title>Admin Dashboard | Aura Learning</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { colors: { indigo: { 50: '#eef2ff', 600: '#4f46e5', 700: '#4338ca' } } } }
+            theme: { extend: { colors: { indigo: { 600: '#4f46e5', 700: '#4338ca' } } } }
         }
     </script>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 min-h-screen flex items-center justify-center p-4">
-    <div id="auth-check" class="text-center">
-        <p class="text-xl font-medium animate-pulse">Checking authentication...</p>
-    </div>
-    
-    <div id="login-form" class="hidden w-full max-w-sm bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800">
-        <h2 class="text-2xl font-bold mb-6">Admin Login</h2>
-        <form id="login-submit" class="space-y-4">
-            <input type="email" id="email" required placeholder="Email" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-            <input type="password" id="password" required placeholder="Password" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-            <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">Login</button>
-        </form>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+    <div id="auth-check" class="fixed inset-0 flex items-center justify-center bg-slate-50">
+        <p class="text-xl font-medium animate-pulse">Authenticating...</p>
     </div>
 
-    <div id="access-denied" class="hidden text-center">
-        <h1 class="text-4xl font-bold text-red-600 mb-4">Access Denied</h1>
-        <p>You do not have permission to access this page.</p>
-        <button onclick="window.location.href='/'" class="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg">Return Home</button>
+    <!-- Login/Denied -->
+    <div id="login-or-denied" class="hidden fixed inset-0 flex items-center justify-center p-4">
+        <div id="login-form" class="hidden w-full max-w-sm bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+            <h2 class="text-2xl font-bold mb-6">Admin Login</h2>
+            <form id="login-submit" class="space-y-4">
+                <input type="email" id="email" required placeholder="Email" class="w-full px-4 py-2 rounded-xl border border-slate-200">
+                <input type="password" id="password" required placeholder="Password" class="w-full px-4 py-2 rounded-xl border border-slate-200">
+                <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold">Login</button>
+            </form>
+        </div>
+        <div id="access-denied" class="hidden text-center">
+            <h1 class="text-4xl font-bold text-red-600 mb-4">Access Denied</h1>
+            <p>You do not have permission.</p>
+            <button onclick="window.location.href='/'" class="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg">Return Home</button>
+        </div>
     </div>
 
-    <div id="admin-panel" class="hidden w-full max-w-2xl bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800">
-        <h1 class="text-2xl font-bold mb-6">Upload Update/Amusement</h1>
-        <form id="upload-form" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium mb-1">Title</label>
-                <input type="text" id="title" required class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Description</label>
-                <textarea id="description" required rows="4" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"></textarea>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">YouTube URL (Optional)</label>
-                <input type="url" id="youtube_url" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Image (Optional)</label>
-                <input type="file" id="image" accept="image/*" class="w-full">
-            </div>
-            <button type="submit" id="submit-btn" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50">
-                Publish
+    <!-- Dashboard -->
+    <div id="admin-panel" class="hidden max-w-5xl mx-auto p-4 md:p-8">
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold">Dashboard</h1>
+            <button onclick="openModal()" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium">
+                <span>+</span> New Post
             </button>
-        </form>
+        </header>
+
+        <div id="posts-container" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Posts injected here -->
+        </div>
     </div>
 
-    <script>
-        // Note: For this to work in production, these must be configured via environment variables.
-        // In this local environment, ensure these variables are set in your .env or build system.
+    <!-- Modal Form -->
+    <div id="post-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg p-8 rounded-3xl shadow-2xl">
+            <h2 id="modal-title" class="text-2xl font-bold mb-6">New Post</h2>
+            <form id="upload-form" class="space-y-4">
+                <input type="hidden" id="postId">
+                <select id="post-type" class="w-full px-4 py-2 rounded-xl border border-slate-200 bg-white">
+                    <option value="update">Update/Amusement</option>
+                    <option value="announcement">Announcement</option>
+                </select>
+                <input type="text" id="title" required placeholder="Title" class="w-full px-4 py-2 rounded-xl border border-slate-200">
+                <textarea id="description" required placeholder="Description" rows="4" class="w-full px-4 py-2 rounded-xl border border-slate-200"></textarea>
+                <input type="url" id="youtube_url" placeholder="YouTube URL (Optional)" class="w-full px-4 py-2 rounded-xl border border-slate-200">
+                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center">
+                    <input type="file" id="image" accept="image/*" class="w-full text-sm">
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold">Cancel</button>
+                    <button type="submit" id="submit-btn" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold">Publish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
         const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-        
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        const modal = document.getElementById('post-modal');
+        function openModal() { modal.classList.remove('hidden'); }
+        function closeModal() { modal.classList.add('hidden'); document.getElementById('upload-form').reset(); document.getElementById('postId').value = ''; }
+        window.openModal = openModal;
+        window.closeModal = closeModal;
 
         async function checkAdmin(session) {
             if (!session || session.user.email !== 'shaan1002006@gmail.com') {
                 document.getElementById('auth-check').classList.add('hidden');
+                document.getElementById('login-or-denied').classList.remove('hidden');
                 if (session) {
                     document.getElementById('access-denied').classList.remove('hidden');
                 } else {
@@ -78,10 +97,55 @@
             }
             document.getElementById('auth-check').classList.add('hidden');
             document.getElementById('admin-panel').classList.remove('hidden');
+            loadPosts();
+        }
+
+        async function loadPosts() {
+            const container = document.getElementById('posts-container');
+            container.innerHTML = '<p class="col-span-full text-center">Loading posts...</p>';
+            const { data, error } = await supabaseClient
+                .from('updates_amusement')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) return container.innerHTML = '<p class="col-span-full text-center text-red-600">Error loading posts.</p>';
+            
+            container.innerHTML = data.map(post => `
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">${post.title}</h3>
+                        <p class="text-slate-500 text-sm line-clamp-3">${post.description}</p>
+                    </div>
+                    <div class="flex gap-2 mt-4 pt-4 border-t">
+                        <button onclick="editPost('${post.id}')" class="flex-1 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium text-sm">Edit</button>
+                        <button onclick="deletePost('${post.id}')" class="flex-1 py-2 bg-red-50 text-red-700 rounded-lg font-medium text-sm">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        window.editPost = async (id) => {
+            const { data, error } = await supabaseClient.from('updates_amusement').select('*').eq('id', id).single();
+            if (error) return alert(error.message);
+            
+            document.getElementById('postId').value = data.id;
+            document.getElementById('title').value = data.title;
+            document.getElementById('description').value = data.description;
+            document.getElementById('youtube_url').value = data.youtube_url || '';
+            document.getElementById('modal-title').textContent = 'Edit Post';
+            document.getElementById('submit-btn').textContent = 'Update';
+            openModal();
+        }
+
+        window.deletePost = async (id) => {
+            if (!confirm('Are you sure?')) return;
+            const { error } = await supabaseClient.from('updates_amusement').delete().eq('id', id);
+            if (error) return alert(error.message);
+            loadPosts();
         }
 
         (async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             await checkAdmin(session);
         })();
 
@@ -89,8 +153,9 @@
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) return alert(error.message);
+            document.getElementById('login-or-denied').classList.add('hidden');
             document.getElementById('login-form').classList.add('hidden');
             await checkAdmin(data.session);
         });
@@ -101,6 +166,7 @@
             btn.disabled = true;
             btn.textContent = 'Publishing...';
 
+            const postId = document.getElementById('postId').value;
             const title = document.getElementById('title').value;
             const description = document.getElementById('description').value;
             const youtube_url = document.getElementById('youtube_url').value;
@@ -111,32 +177,43 @@
                 if (imageFile) {
                     const fileExt = imageFile.name.split('.').pop();
                     const fileName = `${Math.random()}.${fileExt}`;
-                    const { data: imgData, error: imgError } = await supabase.storage
+                    const { data: imgData, error: imgError } = await supabaseClient.storage
                         .from('amusement-media')
                         .upload(fileName, imageFile);
                     
                     if (imgError) throw imgError;
                     
-                    const { data: publicUrlData } = supabase.storage
+                    const { data: publicUrlData } = supabaseClient.storage
                         .from('amusement-media')
                         .getPublicUrl(fileName);
                     image_url = publicUrlData.publicUrl;
                 }
 
-                const { error: dbError } = await supabase
-                    .from('updates_amusement')
-                    .insert([{ title, description, youtube_url, image_url }]);
+                if (postId) {
+                    const updateData = { title, description, youtube_url };
+                    if (image_url) updateData.image_url = image_url;
+                    const { error: dbError } = await supabaseClient
+                        .from('updates_amusement')
+                        .update(updateData)
+                        .eq('id', postId);
+                    if (dbError) throw dbError;
+                    alert('Successfully updated!');
+                } else {
+                    const { error: dbError } = await supabaseClient
+                        .from('updates_amusement')
+                        .insert([{ title, description, youtube_url, image_url }]);
+                    if (dbError) throw dbError;
+                    alert('Successfully published!');
+                }
 
-                if (dbError) throw dbError;
-
-                alert('Successfully published!');
-                document.getElementById('upload-form').reset();
+                closeModal();
+                loadPosts();
             } catch (err) {
                 console.error(err);
-                alert('Error publishing: ' + err.message);
+                alert('Error: ' + err.message);
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Publish';
+                btn.textContent = postId ? 'Update' : 'Publish';
             }
         });
     </script>

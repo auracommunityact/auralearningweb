@@ -93,17 +93,37 @@ export default function App() {
         <div className="w-full text-center space-y-12 relative z-10">
           
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.2
+                }
+              }
+            }}
             className="space-y-6 max-w-3xl mx-auto px-4"
           >
-            <h1 className="text-5xl md:text-7xl font-medium tracking-tight text-slate-900 mt-8">
+            <motion.h1 
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+              }}
+              className="text-5xl md:text-7xl font-medium tracking-tight text-slate-900 mt-8"
+            >
               Find your <span className="text-teal-600 font-serif italic">calm</span> in learning.
-            </h1>
-            <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            </motion.h1>
+            <motion.p 
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+              }}
+              className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed"
+            >
               Aura is a minimalist, distraction-free learning platform designed to help you focus, retain information, and enjoy the process. 
-            </p>
+            </motion.p>
           </motion.div>
 
         </div>

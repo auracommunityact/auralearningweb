@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Learning - Updates & Amusement</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { indigo: { 50: '#eef2ff', 600: '#4f46e5', 700: '#4338ca' } } } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 min-h-screen p-4 md:p-8">
+    <div class="max-w-3xl mx-auto">
+        <a href="/" class="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium mb-8">
+            ← Back to Home
+        </a>
+        <h1 class="text-4xl font-bold mb-8">Updates & Amusement</h1>
+        
+        <div id="loading" class="text-center py-20 text-slate-500">Loading...</div>
+        <div id="no-updates" class="hidden text-center py-20 text-slate-500">No updates available.</div>
+        <div id="feed" class="space-y-8"></div>
+    </div>
+
+    <script type="module">
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        function getYoutubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        async function fetchUpdates() {
+            const feed = document.getElementById('feed');
+            const loading = document.getElementById('loading');
+            const noUpdates = document.getElementById('no-updates');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('updates_amusement')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                loading.classList.add('hidden');
+                
+                if (!data || data.length === 0) {
+                    noUpdates.classList.remove('hidden');
+                    return;
+                }
+
+                data.forEach(post => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4';
+                    
+                    let mediaHtml = '';
+                    if (post.youtube_url) {
+                        const videoId = getYoutubeId(post.youtube_url);
+                        if (videoId) {
+                            mediaHtml += `<div class="aspect-video w-full rounded-2xl overflow-hidden mb-4">
+                                <iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+                            </div>`;
+                        }
+                    }
+                    if (post.image_url) {
+                        mediaHtml += `<img src="${post.image_url}" alt="${post.title}" class="w-full rounded-2xl mb-4">`;
+                    }
+
+                    const description = post.description;
+                    const maxLength = 200;
+                    let descriptionHtml = `<p class="text-slate-600 dark:text-slate-400">${description}</p>`;
+
+                    if (description.length > maxLength) {
+                        const truncated = description.substring(0, maxLength) + '...';
+                        descriptionHtml = `
+                            <div class="description-container">
+                                <p class="text-slate-600 dark:text-slate-400 preview">${truncated}</p>
+                                <p class="text-slate-600 dark:text-slate-400 full hidden">${description}</p>
+                                <button class="read-more-btn text-indigo-600 dark:text-indigo-400 font-medium mt-2 text-sm hover:underline">Read More</button>
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        ${mediaHtml}
+                        <h2 class="text-2xl font-bold">${post.title}</h2>
+                        ${descriptionHtml}
+                    `;
+
+                    card.querySelector('.read-more-btn')?.addEventListener('click', (e) => {
+                        const container = e.target.closest('.description-container');
+                        container.querySelector('.preview').classList.toggle('hidden');
+                        container.querySelector('.full').classList.toggle('hidden');
+                        e.target.textContent = container.querySelector('.full').classList.contains('hidden') ? 'Read More' : 'Read Less';
+                    });
+                    
+                    feed.appendChild(card);
+                });
+            } catch (err) {
+                console.error(err);
+                loading.textContent = 'Error loading updates.';
+            }
+        }
+        
+        fetchUpdates();
+    </script>
+</body>
+</html>
