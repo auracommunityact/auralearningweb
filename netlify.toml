@@ -6,6 +6,21 @@
   command = "npm run build"
 
 [[redirects]]
+  from = "/updates"
+  to = "/updates.html"
+  status = 200
+
+[[redirects]]
+  from = "/announcement"
+  to = "/announcement.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

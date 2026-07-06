@@ -110,18 +110,31 @@
             
             if (error) return container.innerHTML = '<p class="col-span-full text-center text-red-600">Error loading posts.</p>';
             
-            container.innerHTML = data.map(post => `
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-bold text-lg mb-2">${post.title}</h3>
-                        <p class="text-slate-500 text-sm line-clamp-3">${post.description}</p>
+            container.innerHTML = data.map(post => {
+                let displayTitle = post.title;
+                const isAnnouncement = displayTitle.startsWith('[Announcement] ');
+                if (isAnnouncement) {
+                    displayTitle = displayTitle.replace('[Announcement] ', '');
+                }
+                const badgeColor = isAnnouncement ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                const badgeText = isAnnouncement ? 'Announcement' : 'Update/Amusement';
+
+                return `
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeColor}">${badgeText}</span>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2">${displayTitle}</h3>
+                            <p class="text-slate-500 text-sm line-clamp-3">${post.description}</p>
+                        </div>
+                        <div class="flex gap-2 mt-4 pt-4 border-t">
+                            <button onclick="editPost('${post.id}')" class="flex-1 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium text-sm">Edit</button>
+                            <button onclick="deletePost('${post.id}')" class="flex-1 py-2 bg-red-50 text-red-700 rounded-lg font-medium text-sm">Delete</button>
+                        </div>
                     </div>
-                    <div class="flex gap-2 mt-4 pt-4 border-t">
-                        <button onclick="editPost('${post.id}')" class="flex-1 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium text-sm">Edit</button>
-                        <button onclick="deletePost('${post.id}')" class="flex-1 py-2 bg-red-50 text-red-700 rounded-lg font-medium text-sm">Delete</button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
         
         window.editPost = async (id) => {
@@ -129,7 +142,15 @@
             if (error) return alert(error.message);
             
             document.getElementById('postId').value = data.id;
-            document.getElementById('title').value = data.title;
+            
+            let displayTitle = data.title;
+            let postType = 'update';
+            if (displayTitle.startsWith('[Announcement] ')) {
+                displayTitle = displayTitle.replace('[Announcement] ', '');
+                postType = 'announcement';
+            }
+            document.getElementById('post-type').value = postType;
+            document.getElementById('title').value = displayTitle;
             document.getElementById('description').value = data.description;
             document.getElementById('youtube_url').value = data.youtube_url || '';
             document.getElementById('modal-title').textContent = 'Edit Post';
@@ -167,10 +188,11 @@
             btn.textContent = 'Publishing...';
 
             const postId = document.getElementById('postId').value;
-            const title = document.getElementById('title').value;
+            let title = document.getElementById('title').value;
             const description = document.getElementById('description').value;
             const youtube_url = document.getElementById('youtube_url').value;
             const imageFile = document.getElementById('image').files[0];
+            const postType = document.getElementById('post-type').value;
             let image_url = null;
 
             try {
@@ -187,6 +209,10 @@
                         .from('amusement-media')
                         .getPublicUrl(fileName);
                     image_url = publicUrlData.publicUrl;
+                }
+
+                if (postType === 'announcement' && !title.startsWith('[Announcement] ')) {
+                    title = `[Announcement] ${title}`;
                 }
 
                 if (postId) {

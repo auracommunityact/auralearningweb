@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura Learning - Updates & Amusement</title>
+    <title>Aura Learning - Announcements</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -18,16 +18,16 @@
         <a href="/" class="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium mb-8">
             ← Back to Home
         </a>
-        <h1 class="text-4xl font-bold mb-8">Updates & Amusement</h1>
+        <h1 class="text-4xl font-bold mb-8">Announcements</h1>
         
         <div id="loading" class="text-center py-20 text-slate-500">Loading...</div>
-        <div id="no-updates" class="hidden text-center py-20 text-slate-500">No updates available.</div>
+        <div id="no-updates" class="hidden text-center py-20 text-slate-500">No announcements available.</div>
         <div id="feed" class="space-y-8"></div>
     </div>
 
     <script type="module">
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+        const supabaseUrl = 'https://qxoqflrqpwlythgqmjtq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4b3FmbHJxcHdseXRoZ3FtanRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxODIxMTQsImV4cCI6MjA5Nzc1ODExNH0.cJ3hIsEyRtH1m_nmyzwjrdvzsbGIKIiChnmXAjgFRfo';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         function getYoutubeId(url) {
@@ -36,7 +36,7 @@
             return (match && match[2].length === 11) ? match[2] : null;
         }
 
-        async function fetchUpdates() {
+        async function fetchAnnouncements() {
             const feed = document.getElementById('feed');
             const loading = document.getElementById('loading');
             const noUpdates = document.getElementById('no-updates');
@@ -51,15 +51,15 @@
 
                 loading.classList.add('hidden');
                 
-                // Filter out announcements from the updates feed
-                const updates = data ? data.filter(post => !post.title.startsWith('[Announcement] ')) : [];
+                // Filter only announcements
+                const announcements = data ? data.filter(post => post.title.startsWith('[Announcement] ')) : [];
 
-                if (updates.length === 0) {
+                if (announcements.length === 0) {
                     noUpdates.classList.remove('hidden');
                     return;
                 }
 
-                updates.forEach(post => {
+                announcements.forEach(post => {
                     const card = document.createElement('div');
                     card.className = 'bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4';
                     
@@ -91,9 +91,12 @@
                         `;
                     }
 
+                    // Strip prefix for displaying
+                    const cleanTitle = post.title.replace('[Announcement] ', '');
+
                     card.innerHTML = `
                         ${mediaHtml}
-                        <h2 class="text-2xl font-bold">${post.title}</h2>
+                        <h2 class="text-2xl font-bold">${cleanTitle}</h2>
                         ${descriptionHtml}
                     `;
 
@@ -108,11 +111,11 @@
                 });
             } catch (err) {
                 console.error(err);
-                loading.textContent = 'Error loading updates.';
+                loading.textContent = 'Error loading announcements.';
             }
         }
         
-        fetchUpdates();
+        fetchAnnouncements();
     </script>
 </body>
 </html>
