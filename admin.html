@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Learning - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { indigo: { 50: '#eef2ff', 600: '#4f46e5', 700: '#4338ca' } } } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 min-h-screen flex items-center justify-center p-4">
+    <div id="auth-check" class="text-center">
+        <p class="text-xl font-medium animate-pulse">Checking authentication...</p>
+    </div>
+    
+    <div id="login-form" class="hidden w-full max-w-sm bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800">
+        <h2 class="text-2xl font-bold mb-6">Admin Login</h2>
+        <form id="login-submit" class="space-y-4">
+            <input type="email" id="email" required placeholder="Email" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+            <input type="password" id="password" required placeholder="Password" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+            <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">Login</button>
+        </form>
+    </div>
+
+    <div id="access-denied" class="hidden text-center">
+        <h1 class="text-4xl font-bold text-red-600 mb-4">Access Denied</h1>
+        <p>You do not have permission to access this page.</p>
+        <button onclick="window.location.href='/'" class="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg">Return Home</button>
+    </div>
+
+    <div id="admin-panel" class="hidden w-full max-w-2xl bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800">
+        <h1 class="text-2xl font-bold mb-6">Upload Update/Amusement</h1>
+        <form id="upload-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Title</label>
+                <input type="text" id="title" required class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Description</label>
+                <textarea id="description" required rows="4" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">YouTube URL (Optional)</label>
+                <input type="url" id="youtube_url" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Image (Optional)</label>
+                <input type="file" id="image" accept="image/*" class="w-full">
+            </div>
+            <button type="submit" id="submit-btn" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50">
+                Publish
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Note: For this to work in production, these must be configured via environment variables.
+        // In this local environment, ensure these variables are set in your .env or build system.
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+        
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function checkAdmin(session) {
+            if (!session || session.user.email !== 'shaan1002006@gmail.com') {
+                document.getElementById('auth-check').classList.add('hidden');
+                if (session) {
+                    document.getElementById('access-denied').classList.remove('hidden');
+                } else {
+                    document.getElementById('login-form').classList.remove('hidden');
+                }
+                return;
+            }
+            document.getElementById('auth-check').classList.add('hidden');
+            document.getElementById('admin-panel').classList.remove('hidden');
+        }
+
+        (async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            await checkAdmin(session);
+        })();
+
+        document.getElementById('login-submit').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) return alert(error.message);
+            document.getElementById('login-form').classList.add('hidden');
+            await checkAdmin(data.session);
+        });
+
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Publishing...';
+
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const youtube_url = document.getElementById('youtube_url').value;
+            const imageFile = document.getElementById('image').files[0];
+            let image_url = null;
+
+            try {
+                if (imageFile) {
+                    const fileExt = imageFile.name.split('.').pop();
+                    const fileName = `${Math.random()}.${fileExt}`;
+                    const { data: imgData, error: imgError } = await supabase.storage
+                        .from('amusement-media')
+                        .upload(fileName, imageFile);
+                    
+                    if (imgError) throw imgError;
+                    
+                    const { data: publicUrlData } = supabase.storage
+                        .from('amusement-media')
+                        .getPublicUrl(fileName);
+                    image_url = publicUrlData.publicUrl;
+                }
+
+                const { error: dbError } = await supabase
+                    .from('updates_amusement')
+                    .insert([{ title, description, youtube_url, image_url }]);
+
+                if (dbError) throw dbError;
+
+                alert('Successfully published!');
+                document.getElementById('upload-form').reset();
+            } catch (err) {
+                console.error(err);
+                alert('Error publishing: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Publish';
+            }
+        });
+    </script>
+</body>
+</html>
