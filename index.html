@@ -216,7 +216,7 @@
         </div>
         
         <!-- Admin Button -->
-        <div class="p-4 border-t border-slate-100 dark:border-slate-800">
+        <div id="admin-button-container" class="hidden p-4 border-t border-slate-100 dark:border-slate-800">
             <a href="/admin.html" class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/20 dark:hover:bg-slate-900/30 text-slate-600 dark:text-slate-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
                 <i data-lucide="shield-check" class="w-5 h-5"></i> Admin Panel
             </a>
@@ -966,12 +966,20 @@
 
         // Listen to Auth State Changes
         supabaseClient.auth.onAuthStateChange((event, session) => {
+            const adminButtonContainer = document.getElementById('admin-button-container');
             if (session && session.user) {
                 // User is logged in
                 authLoggedOut.classList.add('hidden');
                 authLoggedIn.classList.remove('hidden');
                 userEmailDisplay.textContent = session.user.email;
                 
+                // Show Admin Panel button ONLY if user email is shaan1002006@gmail.com
+                if (session.user.email === 'shaan1002006@gmail.com') {
+                    if (adminButtonContainer) adminButtonContainer.classList.remove('hidden');
+                } else {
+                    if (adminButtonContainer) adminButtonContainer.classList.add('hidden');
+                }
+
                 // Referral Logic Display
                 const meta = session.user.user_metadata || {};
                 const myCode = meta.referral_code || '---';
@@ -993,6 +1001,7 @@
                 authLoggedIn.classList.add('hidden');
                 authLoggedOut.classList.remove('hidden');
                 userEmailDisplay.textContent = '';
+                if (adminButtonContainer) adminButtonContainer.classList.add('hidden');
                 toggleAuthMode('login'); // Reset to login view
             }
         });
