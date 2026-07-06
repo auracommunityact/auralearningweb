@@ -7,13 +7,13 @@
 
 [[redirects]]
   from = "/updates"
-  to = "/updates.html"
-  status = 200
+  to = "/#updates"
+  status = 301
 
 [[redirects]]
   from = "/announcement"
-  to = "/announcement.html"
-  status = 200
+  to = "/#announcements"
+  status = 301
 
 [[redirects]]
   from = "/admin"
