@@ -3,20 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Learning - Transform Your Education Journey</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Experience a personalized, smart learning application designed to adapt to your unique pace and goals. Aura Learning offers interactive decking, smart adaptation, and decentralized auth.">
+    <meta name="keywords" content="Education, E-Learning, Online Learning, Interactive Learning, Flashcards, Personalized Study">
+    <meta name="author" content="Aura Learning">
+    <link rel="canonical" href="https://ais-pre-md445vldjd7jquxyou3ama-1062068490011.asia-southeast1.run.app" />
     <meta name="google-site-verification" content="RU5gyxOKztpk7GEeIquR4mh70jtRUlp9BLlhwb6PQcE" />
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ais-pre-md445vldjd7jquxyou3ama-1062068490011.asia-southeast1.run.app">
     <meta property="og:title" content="Aura Learning - Transform Your Education Journey">
     <meta property="og:description" content="Experience a personalized, smart learning application designed to adapt to your unique pace and goals.">
     <meta property="og:image" content="https://placehold.co/1200x630/4f46e5/ffffff?text=Aura+Learning">
+    
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://ais-pre-md445vldjd7jquxyou3ama-1062068490011.asia-southeast1.run.app">
     <meta property="twitter:title" content="Aura Learning - Transform Your Education Journey">
     <meta property="twitter:description" content="Experience a personalized, smart learning application designed to adapt to your unique pace and goals.">
     <meta property="twitter:image" content="https://placehold.co/1200x630/4f46e5/ffffff?text=Aura+Learning">
-    <title>Aura Learning - Transform Your Education Journey</title>
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "name": "Aura Learning",
+      "url": "https://ais-pre-md445vldjd7jquxyou3ama-1062068490011.asia-southeast1.run.app",
+      "description": "Experience a personalized, smart learning application designed to adapt to your unique pace and goals.",
+      "logo": "https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png"
+    }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -95,13 +116,27 @@
         <div class="p-6 flex-1 overflow-y-auto flex flex-col">
             <!-- Logged In View -->
             <div id="auth-logged-in" class="hidden flex-col h-full">
-                <div class="flex items-center gap-4 mb-8 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-4 mb-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xl shrink-0">
                         <i data-lucide="user" class="w-6 h-6"></i>
                     </div>
                     <div class="overflow-hidden">
                         <h4 class="font-semibold text-slate-900 dark:text-white truncate">Welcome back</h4>
                         <p id="user-email-display" class="text-sm text-slate-500 dark:text-slate-400 truncate">user@example.com</p>
+                    </div>
+                </div>
+
+                <div class="mb-8 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
+                    <h5 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">Your Referral Code</h5>
+                    <div class="flex items-center justify-between bg-white dark:bg-slate-950 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <span id="user-referral-code" class="font-mono font-bold text-slate-900 dark:text-white tracking-widest text-lg">---</span>
+                        <button onclick="copyReferralCode()" class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors focus:outline-none" aria-label="Copy referral code">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="referred-badge" class="mt-3 hidden items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1.5 rounded-lg w-fit border border-emerald-100 dark:border-emerald-800/30">
+                        <i data-lucide="award" class="w-4 h-4"></i>
+                        Bonus Access Unlocked
                     </div>
                 </div>
                 
@@ -160,6 +195,10 @@
                         <div>
                             <label for="signup-password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
                             <input type="password" id="signup-password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="••••••••">
+                        </div>
+                        <div>
+                            <label for="signup-referral" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Referral Code (Optional)</label>
+                            <input type="text" id="signup-referral" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all uppercase" placeholder="e.g. AURA123">
                         </div>
                     </div>
 
@@ -228,6 +267,89 @@
                     <!-- Decorative background blur elements -->
                     <div class="absolute -top-10 -right-10 w-48 h-48 bg-violet-400 dark:bg-violet-600 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-30 dark:opacity-20 transition-all duration-300"></div>
                     <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-indigo-400 dark:bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-30 dark:opacity-20 transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features & Showcase Section -->
+    <section class="py-24 bg-slate-50 dark:bg-slate-900/40 border-y border-slate-100 dark:border-slate-800/50 relative z-20 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-indigo-600 dark:text-indigo-400 text-sm font-semibold tracking-wider uppercase mb-2 block">Powerful Capabilities</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tight">Features & App Walkthrough</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Explore the tools and interactive tutorials that make learning with Aura simple, engaging, and personal.</p>
+            </div>
+
+            <!-- Descriptive Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                <!-- Card 1 -->
+                <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Smart Adaptation</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Our algorithm customizes lesson structures based on your unique study speed and habits.</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Interactive Decking</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Organize concepts into clean study packs, complete with customizable recall tests.</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Decentralized Auth</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Securely sign in with Supabase authentication while maintaining device integrity.</p>
+                </div>
+                <!-- Card 4 -->
+                <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-12 h-12 bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 rounded-xl flex items-center justify-center mb-4">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Instant Offline</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Continue studying your preloaded content offline without missing a step.</p>
+                </div>
+            </div>
+
+            <!-- Embedded Video Showcase -->
+            <div class="text-center mb-8">
+                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Video Guides & Demonstrations</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Watch the videos below to learn more about our interactive workspace and features.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <!-- Video 1 -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200/50 dark:border-slate-800 shadow-lg flex flex-col">
+                    <div class="aspect-video rounded-2xl overflow-hidden shadow-inner relative bg-slate-900">
+                        <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/rGT_Fq3qd7o" title="Aura Learning Video 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    </div>
+                    <div class="mt-4 flex-1">
+                        <h4 class="font-bold text-slate-900 dark:text-white text-lg mb-1 flex items-center gap-2">
+                            <i data-lucide="play-circle" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                            Aura Learning App Overview
+                        </h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">A detailed look at the interface, user progression pathways, and customizable modules built to guide your learning.</p>
+                    </div>
+                </div>
+
+                <!-- Video 2 -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200/50 dark:border-slate-800 shadow-lg flex flex-col">
+                    <div class="aspect-video rounded-2xl overflow-hidden shadow-inner relative bg-slate-900">
+                        <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/kUAApW4cnnM" title="Aura Learning Video 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    </div>
+                    <div class="mt-4 flex-1">
+                        <h4 class="font-bold text-slate-900 dark:text-white text-lg mb-1 flex items-center gap-2">
+                            <i data-lucide="play-circle" class="w-5 h-5 text-violet-600 dark:text-violet-400"></i>
+                            Deep Dive & Interactive Methods
+                        </h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Explore core learning paradigms, custom analytics dashboard trackers, and smart integration features.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -388,7 +510,7 @@
                 <h4 class="font-semibold text-slate-900 dark:text-white mt-4">3. Data Retention</h4>
                 <p>Your local data stays entirely on your device until you delete the app or manually clear your application data.</p>
                 
-                <p class="mt-8 text-sm">For any questions regarding these terms, please contact us at support@auralearning.com</p>
+                <p class="mt-8 text-sm">For any questions regarding these terms, please contact us at auralearning.help@gmail.com</p>
             </div>
             <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 rounded-b-3xl flex justify-end transition-colors duration-300">
                 <button onclick="closeModal('privacy-modal')" class="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-6 py-2.5 rounded-full font-medium transition-colors">
@@ -419,7 +541,7 @@
                 <h4 class="font-semibold text-slate-900 dark:text-white mt-4">3. Disclaimer</h4>
                 <p>The materials within Aura Learning are provided on an 'as is' basis. We make no warranties, expressed or implied, and hereby disclaim and negate all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.</p>
                 
-                <p class="mt-8 text-sm">For any questions regarding these terms, please contact us at support@auralearning.com</p>
+                <p class="mt-8 text-sm">For any questions regarding these terms, please contact us at auralearning.help@gmail.com</p>
             </div>
             <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 rounded-b-3xl flex justify-end transition-colors duration-300">
                 <button onclick="closeModal('terms-modal')" class="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-6 py-2.5 rounded-full font-medium transition-colors">
@@ -644,6 +766,32 @@
             }
         }
 
+        // Generate Random Referral Code
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // Copy Referral Code
+        window.copyReferralCode = function() {
+            const codeText = document.getElementById('user-referral-code').innerText;
+            if(codeText && codeText !== '---') {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const btn = document.querySelector('button[aria-label="Copy referral code"]');
+                    btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>';
+                    lucide.createIcons();
+                    setTimeout(() => {
+                        btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i>';
+                        lucide.createIcons();
+                    }, 2000);
+                });
+            }
+        };
+
         // Handle Signup
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -652,10 +800,18 @@
             
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
+            const referralCodeInput = document.getElementById('signup-referral').value.toUpperCase().trim();
+            const generatedCode = generateReferralCode();
 
             const { data, error } = await supabaseClient.auth.signUp({
                 email,
                 password,
+                options: {
+                    data: {
+                        referral_code: generatedCode,
+                        referred_by: referralCodeInput || null
+                    }
+                }
             });
 
             setLoadingState('signup', false);
@@ -706,6 +862,23 @@
                 authLoggedOut.classList.add('hidden');
                 authLoggedIn.classList.remove('hidden');
                 userEmailDisplay.textContent = session.user.email;
+                
+                // Referral Logic Display
+                const meta = session.user.user_metadata || {};
+                const myCode = meta.referral_code || '---';
+                const referredBy = meta.referred_by || null;
+                
+                document.getElementById('user-referral-code').textContent = myCode;
+                
+                // Show badge if they were referred by someone
+                if(referredBy) {
+                    document.getElementById('referred-badge').classList.remove('hidden');
+                    document.getElementById('referred-badge').classList.add('flex');
+                } else {
+                    document.getElementById('referred-badge').classList.add('hidden');
+                    document.getElementById('referred-badge').classList.remove('flex');
+                }
+
             } else {
                 // User is logged out
                 authLoggedIn.classList.add('hidden');
