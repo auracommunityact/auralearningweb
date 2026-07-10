@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Download, LogOut, ShieldAlert } from 'lucide-react';
+import { X, Download, LogOut, ShieldAlert, Youtube, Instagram } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { ShareSection } from './ShareSection';
 
@@ -121,6 +121,33 @@ export function Sidebar({ isOpen, onClose, user, isAdmin, onSignOut, onShowToast
               {/* Share */}
               <div className="-mt-4">
                 <ShareSection onShowToast={onShowToast} />
+              </div>
+
+              {/* Social Channels */}
+              <div className="space-y-4 mt-auto pt-6 border-t border-slate-100">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Follow Our Journey</h3>
+                <div className="flex justify-center items-center gap-8">
+                  <a
+                    href="https://youtube.com/@auralearningofficialy?si=anKX8ID1oPFd6MHi"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center gap-1.5 text-slate-500 hover:text-red-600 transition-colors"
+                    aria-label="YouTube"
+                  >
+                    <Youtube size={24} />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider">YouTube</span>
+                  </a>
+                  <a
+                    href="https://www.instagram.com/auralearningofficialy?igsh=NmJ0Mm83OXo2NjMx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center gap-1.5 text-slate-500 hover:text-pink-600 transition-colors"
+                    aria-label="Instagram"
+                  >
+                    <Instagram size={24} />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider">Instagram</span>
+                  </a>
+                </div>
               </div>
             </div>
           </motion.div>
