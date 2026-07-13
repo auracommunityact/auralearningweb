@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura Learning - Transform Your Education Journey</title>
+    <title>Updates & Announcements - Aura Learning</title>
     
     <!-- Favicon & PWA App Icons -->
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -116,10 +116,10 @@
     <nav class="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center gap-3">
+                <a href="/" class="flex items-center gap-3">
                     <img src="https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png" alt="Aura Learning Logo" class="h-10 w-auto object-contain">
                     <span class="font-bold text-xl tracking-tight text-indigo-950 dark:text-white transition-colors duration-300">Aura Learning</span>
-                </div>
+                </a>
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="theme-toggle" class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none" aria-label="Toggle dark mode">
                         <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
@@ -254,14 +254,14 @@
 
         <!-- Updates & Amusement Link -->
         <div class="p-4 border-t border-slate-100 dark:border-slate-800">
-            <a href="/updates.html#updates" class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/20 dark:hover:bg-slate-900/30 text-slate-600 dark:text-slate-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+            <a href="/updates.html#updates" onclick="closeSidebar()" class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/20 dark:hover:bg-slate-900/30 text-slate-600 dark:text-slate-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
                 <i data-lucide="sparkles" class="w-5 h-5"></i> Updates & Amusement
             </a>
         </div>
 
         <!-- Announcements Link -->
         <div class="p-4 border-t border-slate-100 dark:border-slate-800">
-            <a href="/updates.html#announcements" class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/20 dark:hover:bg-slate-900/30 text-slate-600 dark:text-slate-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+            <a href="/updates.html#announcements" onclick="closeSidebar()" class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/20 dark:hover:bg-slate-900/30 text-slate-600 dark:text-slate-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
                 <i data-lucide="megaphone" class="w-5 h-5"></i> Announcements
             </a>
         </div>
@@ -289,232 +289,53 @@
         </div>
     </aside>
 
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden pt-16 pb-32 lg:pt-24 lg:pb-40 bg-gradient-to-br from-white via-indigo-50/50 to-violet-100/50 dark:from-slate-950 dark:via-indigo-950/30 dark:to-violet-950/30 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
-                <div class="text-center lg:text-left mb-16 lg:mb-0">
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight transition-colors duration-300">
-                        Transform Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500 dark:from-indigo-400 dark:to-violet-400">Education Journey</span> with Aura Learning
-                    </h1>
-                    <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto lg:mx-0 transition-colors duration-300">
-                        Experience a personalized, smart learning application designed to adapt to your unique pace and goals. Your ultimate companion for continuous growth.
-                    </p>
-                    <div class="mt-8 text-center lg:text-left">
-                        <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Aura Learning App Coming Soon</h3>
-                        <p class="text-indigo-600 dark:text-indigo-400 font-medium mb-6 text-sm sm:text-base">12:00 PM, Tuesday, February 2, 2027</p>
-                        
-                        <div class="flex flex-wrap justify-center lg:justify-start gap-3 sm:gap-4">
-                            <!-- Days -->
-                            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 sm:p-5 min-w-[80px] sm:min-w-[100px] border border-slate-200/50 dark:border-white/5 shadow-xl dark:shadow-none">
-                                <div id="cd-days" class="text-3xl sm:text-4xl font-black text-slate-800 dark:text-white mb-1 tabular-nums tracking-tighter">00</div>
-                                <div class="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-indigo-300/80 uppercase tracking-widest">Days</div>
-                            </div>
-                            <!-- Hours -->
-                            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 sm:p-5 min-w-[80px] sm:min-w-[100px] border border-slate-200/50 dark:border-white/5 shadow-xl dark:shadow-none">
-                                <div id="cd-hours" class="text-3xl sm:text-4xl font-black text-slate-800 dark:text-white mb-1 tabular-nums tracking-tighter">00</div>
-                                <div class="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-indigo-300/80 uppercase tracking-widest">Hours</div>
-                            </div>
-                            <!-- Minutes -->
-                            <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 sm:p-5 min-w-[80px] sm:min-w-[100px] border border-slate-200/50 dark:border-white/5 shadow-xl dark:shadow-none">
-                                <div id="cd-minutes" class="text-3xl sm:text-4xl font-black text-slate-800 dark:text-white mb-1 tabular-nums tracking-tighter">00</div>
-                                <div class="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-indigo-300/80 uppercase tracking-widest">Minutes</div>
-                            </div>
-                            <!-- Seconds -->
-                            <div class="bg-indigo-50/80 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-4 sm:p-5 min-w-[80px] sm:min-w-[100px] border border-indigo-200 dark:border-indigo-500/20 shadow-xl shadow-indigo-100 dark:shadow-[0_8px_32px_rgba(79,70,229,0.2)]">
-                                <div id="cd-seconds" class="text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400 mb-1 tabular-nums tracking-tighter">00</div>
-                                <div class="text-[10px] sm:text-xs font-semibold text-indigo-600/80 dark:text-indigo-300/80 uppercase tracking-widest">Seconds</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="relative mx-auto w-full max-w-sm lg:max-w-md">
-                    <div class="relative aspect-[9/19] bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl border-[10px] border-slate-900 dark:border-slate-800 overflow-hidden transition-colors duration-300">
-                        <!-- Mockup Screen Notch -->
-                        <div class="absolute top-0 inset-x-0 h-6 bg-slate-900 dark:bg-slate-800 rounded-b-2xl w-32 mx-auto z-20 transition-colors duration-300"></div>
-                        <!-- Mockup Content -->
-                        <div class="h-full w-full bg-slate-50 dark:bg-slate-950 flex flex-col relative transition-colors duration-300 overflow-hidden">
-                            <img src="https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/Screenshot_2026_0704_100914.png" alt="Aura Learning App Screenshot" class="w-full h-full object-cover">
-                        </div>
-                    </div>
-                    
-                    <!-- Decorative background blur elements -->
-                    <div class="absolute -top-10 -right-10 w-48 h-48 bg-violet-400 dark:bg-violet-600 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-30 dark:opacity-20 transition-all duration-300"></div>
-                    <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-indigo-400 dark:bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-30 dark:opacity-20 transition-all duration-300"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features & Showcase Section -->
-    <section class="py-24 bg-slate-50 dark:bg-slate-900/40 border-y border-slate-100 dark:border-slate-800/50 relative z-20 transition-colors duration-300">
+    <!-- Updates & Amusement Section -->
+    <section id="updates" class="py-24 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <span class="text-indigo-600 dark:text-indigo-400 text-sm font-semibold tracking-wider uppercase mb-2 block">Powerful Capabilities</span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tight">Features & App Walkthrough</h2>
-                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Explore the tools and interactive tutorials that make learning with Aura simple, engaging, and personal.</p>
-            </div>
-
-            <!-- Descriptive Cards Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-                <!-- Card 1 -->
-                <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center mb-4">
-                        <i data-lucide="sparkles" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Smart Adaptation</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Our algorithm customizes lesson structures based on your unique study speed and habits.</p>
-                </div>
-                <!-- Card 2 -->
-                <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-12 h-12 bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 rounded-xl flex items-center justify-center mb-4">
-                        <i data-lucide="book-open" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Interactive Decking</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Organize concepts into clean study packs, complete with customizable recall tests.</p>
-                </div>
-                <!-- Card 3 -->
-                <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center mb-4">
-                        <i data-lucide="shield-check" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Decentralized Auth</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Securely sign in with Supabase authentication while maintaining device integrity.</p>
-                </div>
-                <!-- Card 4 -->
-                <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-slate-200/50 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-12 h-12 bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 rounded-xl flex items-center justify-center mb-4">
-                        <i data-lucide="zap" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Instant Offline</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Continue studying your preloaded content offline without missing a step.</p>
-                </div>
-            </div>
-
-            <!-- Embedded Video Showcase -->
-            <div class="text-center mb-8">
-                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Video Guides & Demonstrations</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Watch the videos below to learn more about our interactive workspace and features.</p>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-4 transition-colors duration-300">
+                    Updates & Amusement
+                </h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto transition-colors duration-300">
+                    Stay up to date with the latest features, releases, and fun updates from Aura Learning.
+                </p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                <!-- Video 1 -->
-                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200/50 dark:border-slate-800 shadow-lg flex flex-col">
-                    <div class="aspect-video rounded-2xl overflow-hidden shadow-inner relative bg-slate-900">
-                        <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/rGT_Fq3qd7o" title="Aura Learning Video 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                    </div>
-                    <div class="mt-4 flex-1">
-                        <h4 class="font-bold text-slate-900 dark:text-white text-lg mb-1 flex items-center gap-2">
-                            <i data-lucide="play-circle" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
-                            Aura Learning App Overview
-                        </h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400">A detailed look at the interface, user progression pathways, and customizable modules built to guide your learning.</p>
-                    </div>
-                </div>
-
-                <!-- Video 2 -->
-                <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200/50 dark:border-slate-800 shadow-lg flex flex-col">
-                    <div class="aspect-video rounded-2xl overflow-hidden shadow-inner relative bg-slate-900">
-                        <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/kUAApW4cnnM" title="Aura Learning Video 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                    </div>
-                    <div class="mt-4 flex-1">
-                        <h4 class="font-bold text-slate-900 dark:text-white text-lg mb-1 flex items-center gap-2">
-                            <i data-lucide="play-circle" class="w-5 h-5 text-violet-600 dark:text-violet-400"></i>
-                            Deep Dive & Interactive Methods
-                        </h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400">Explore core learning paradigms, custom analytics dashboard trackers, and smart integration features.</p>
-                    </div>
-                </div>
+            <div id="updates-loading" class="text-center py-20 text-slate-500">
+                <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-3 text-indigo-600 dark:text-indigo-400"></i>
+                <p class="text-sm font-medium">Loading updates...</p>
             </div>
+            <div id="updates-empty" class="hidden text-center py-20 text-slate-500">
+                <i data-lucide="sparkles" class="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-700"></i>
+                <p class="text-lg font-semibold">No updates available</p>
+                <p class="text-sm text-slate-400 mt-1">Check back later for new updates!</p>
+            </div>
+            <div id="updates-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
     </section>
 
-    <!-- Core Features Section -->
-    <section class="py-24 bg-white dark:bg-slate-950 relative z-20 transition-colors duration-300">
+    <!-- Announcements Section -->
+    <section id="announcements" class="py-24 bg-slate-50 dark:bg-slate-900/30 border-t border-slate-100 dark:border-slate-900 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4 transition-colors duration-300">Why Choose Aura Learning?</h2>
-                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto transition-colors duration-300">Built with modern learners in mind, prioritizing your privacy and experience.</p>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-4 transition-colors duration-300">
+                    Announcements
+                </h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto transition-colors duration-300">
+                    Important official news, announcements, and notices from the Aura Learning team.
+                </p>
             </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <!-- Card 1 -->
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 hover:shadow-xl dark:hover:shadow-slate-900/50 transition-all duration-300">
-                    <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
-                        <i data-lucide="user" class="w-7 h-7"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 transition-colors duration-300">Personalized Profile</h3>
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">
-                        Custom avatar and name settings saved securely on your device. Tailor your learning identity.
-                    </p>
-                </div>
-                <!-- Card 2 -->
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 hover:shadow-xl dark:hover:shadow-slate-900/50 transition-all duration-300">
-                    <div class="w-14 h-14 bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
-                        <i data-lucide="cloud-upload" class="w-7 h-7"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 transition-colors duration-300">Quick Upload Sync</h3>
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">
-                        Instantly check and track your uploads with our dedicated web link. Always stay organized.
-                    </p>
-                </div>
-                <!-- Card 3 -->
-                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 hover:shadow-xl dark:hover:shadow-slate-900/50 transition-all duration-300">
-                    <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
-                        <i data-lucide="shield" class="w-7 h-7"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 transition-colors duration-300">Privacy First</h3>
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">
-                        Your local data stays entirely on your device until you delete the app. We respect your digital boundaries.
-                    </p>
-                </div>
+            
+            <div id="announcements-loading" class="text-center py-20 text-slate-500">
+                <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-3 text-indigo-600 dark:text-indigo-400"></i>
+                <p class="text-sm font-medium">Loading announcements...</p>
             </div>
-        </div>
-    </section>
-
-    <!-- FAQs Section -->
-    <section class="py-24 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-900 transition-colors duration-300">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4 transition-colors duration-300">Frequently Asked Questions</h2>
+            <div id="announcements-empty" class="hidden text-center py-20 text-slate-500">
+                <i data-lucide="megaphone" class="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-700"></i>
+                <p class="text-lg font-semibold">No announcements available</p>
+                <p class="text-sm text-slate-400 mt-1">We will post announcements here when they are available.</p>
             </div>
-            <div class="space-y-4">
-                <!-- FAQ 1 -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden faq-item transition-colors duration-300">
-                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none group" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-slate-900 dark:text-slate-100 text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Is Aura Learning free to use?</span>
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 dark:text-slate-500 chevron transition-transform duration-300"></i>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="px-6 pb-5 text-slate-600 dark:text-slate-400 transition-colors duration-300">
-                            Yes, Aura Learning is completely free to download and use with all core features available immediately.
-                        </div>
-                    </div>
-                </div>
-                <!-- FAQ 2 -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden faq-item transition-colors duration-300">
-                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none group" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-slate-900 dark:text-slate-100 text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Where is my profile data stored?</span>
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 dark:text-slate-500 chevron transition-transform duration-300"></i>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="px-6 pb-5 text-slate-600 dark:text-slate-400 transition-colors duration-300">
-                            Completely offline on your local device for maximum privacy.
-                        </div>
-                    </div>
-                </div>
-                <!-- FAQ 3 -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden faq-item transition-colors duration-300">
-                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none group" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-slate-900 dark:text-slate-100 text-lg group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">How do I check my uploads?</span>
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 dark:text-slate-500 chevron transition-transform duration-300"></i>
-                    </button>
-                    <div class="accordion-content">
-                        <div class="px-6 pb-5 text-slate-600 dark:text-slate-400 transition-colors duration-300">
-                            You can check and track your uploads instantly by navigating to the 'Sync' tab inside the app or using your dedicated personal web link.
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div id="announcements-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
     </section>
 
@@ -1015,6 +836,126 @@
                 toggleAuthMode('login'); // Reset to login view
             }
         });
+
+        // Fetch and Render Updates & Announcements on Homepage
+        function getYoutubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url?.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        async function loadHomepageFeeds() {
+            const updatesFeed = document.getElementById('updates-feed');
+            const updatesLoading = document.getElementById('updates-loading');
+            const updatesEmpty = document.getElementById('updates-empty');
+
+            const announcementsFeed = document.getElementById('announcements-feed');
+            const announcementsLoading = document.getElementById('announcements-loading');
+            const announcementsEmpty = document.getElementById('announcements-empty');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('updates_amusement')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (updatesLoading) updatesLoading.classList.add('hidden');
+                if (announcementsLoading) announcementsLoading.classList.add('hidden');
+
+                const posts = data || [];
+                const announcements = posts.filter(post => post.title && post.title.startsWith('[Announcement] '));
+                const updates = posts.filter(post => !post.title || !post.title.startsWith('[Announcement] '));
+
+                // Render Updates Section
+                if (updates.length === 0) {
+                    if (updatesEmpty) updatesEmpty.classList.remove('hidden');
+                } else {
+                    updates.forEach(post => {
+                        const card = createFeedCard(post, false);
+                        updatesFeed.appendChild(card);
+                    });
+                }
+
+                // Render Announcements Section
+                if (announcements.length === 0) {
+                    if (announcementsEmpty) announcementsEmpty.classList.remove('hidden');
+                } else {
+                    announcements.forEach(post => {
+                        const card = createFeedCard(post, true);
+                        announcementsFeed.appendChild(card);
+                    });
+                }
+
+                // Refresh Lucide Icons for dynamic content
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error('Error loading homepage feeds:', err);
+                if (updatesLoading) updatesLoading.innerHTML = '<p class="text-red-500">Error loading updates.</p>';
+                if (announcementsLoading) announcementsLoading.innerHTML = '<p class="text-red-500">Error loading announcements.</p>';
+            }
+        }
+
+        function createFeedCard(post, isAnnouncement) {
+            const card = document.createElement('div');
+            card.className = 'bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:shadow-md transition-shadow duration-300';
+            
+            let mediaHtml = '';
+            if (post.youtube_url) {
+                const videoId = getYoutubeId(post.youtube_url);
+                if (videoId) {
+                    mediaHtml += `<div class="aspect-video w-full rounded-2xl overflow-hidden mb-4">
+                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+                    </div>`;
+                }
+            }
+            if (post.image_url) {
+                mediaHtml += `<div class="w-full rounded-2xl overflow-hidden mb-4 max-h-64 flex items-center justify-center bg-slate-100 dark:bg-slate-800"><img src="${post.image_url}" alt="${post.title}" class="w-full h-full object-cover"></div>`;
+            }
+
+            const description = post.description || '';
+            const maxLength = 200;
+            let descriptionHtml = `<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">${description}</p>`;
+
+            if (description.length > maxLength) {
+                const truncated = description.substring(0, maxLength) + '...';
+                descriptionHtml = `
+                    <div class="description-container">
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed preview">${truncated}</p>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed full hidden">${description}</p>
+                        <button class="read-more-btn text-indigo-600 dark:text-indigo-400 font-medium mt-2 text-sm hover:underline flex items-center gap-1">Read More <i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+                    </div>
+                `;
+            }
+
+            const cleanTitle = isAnnouncement ? post.title.replace('[Announcement] ', '') : post.title;
+
+            card.innerHTML = `
+                <div>
+                    ${mediaHtml}
+                    <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white transition-colors duration-300">${cleanTitle}</h3>
+                    ${descriptionHtml}
+                </div>
+            `;
+
+            card.querySelector('.read-more-btn')?.addEventListener('click', (e) => {
+                const container = e.target.closest('.description-container');
+                const isHidden = container.querySelector('.full').classList.contains('hidden');
+                container.querySelector('.preview').classList.toggle('hidden');
+                container.querySelector('.full').classList.toggle('hidden');
+                e.currentTarget.innerHTML = isHidden 
+                    ? `Read Less <i data-lucide="chevron-up" class="w-4 h-4"></i>`
+                    : `Read More <i data-lucide="chevron-down" class="w-4 h-4"></i>`;
+                lucide.createIcons();
+            });
+
+            return card;
+        }
+
+        // Initialize Feeds on page load
+        loadHomepageFeeds();
 
     </script>
 </body>

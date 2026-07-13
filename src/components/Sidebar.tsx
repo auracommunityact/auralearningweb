@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Download, LogOut, ShieldAlert, Youtube, Instagram } from 'lucide-react';
+import { X, Download, LogOut, ShieldAlert, Youtube, Instagram, Sparkles } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { ShareSection } from './ShareSection';
 
@@ -103,6 +103,20 @@ export function Sidebar({ isOpen, onClose, user, isAdmin, onSignOut, onShowToast
               {/* App Download */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wide">App</h3>
+                
+                <a
+                  href="/updates.html"
+                  className="flex items-center space-x-3 p-4 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-100 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                    <Sparkles size={20} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900 text-sm">Updates & Announcements</p>
+                    <p className="text-xs text-slate-500 mt-0.5">News and releases</p>
+                  </div>
+                </a>
+
                 <a
                   href="/AuraLearning.apk"
                   download
