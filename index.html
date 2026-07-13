@@ -73,6 +73,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         html { scroll-behavior: smooth; }
@@ -116,7 +119,7 @@
     <nav class="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="showNormalHomepage()">
                     <img src="https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png" alt="Aura Learning Logo" class="h-10 w-auto object-contain">
                     <span class="font-bold text-xl tracking-tight text-indigo-950 dark:text-white transition-colors duration-300">Aura Learning</span>
                 </div>
@@ -289,6 +292,7 @@
         </div>
     </aside>
 
+    <div id="homepage-content">
     <!-- Hero Section -->
     <section class="relative overflow-hidden pt-16 pb-32 lg:pt-24 lg:pb-40 bg-gradient-to-br from-white via-indigo-50/50 to-violet-100/50 dark:from-slate-950 dark:via-indigo-950/30 dark:to-violet-950/30 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -517,6 +521,84 @@
             </div>
         </div>
     </section>
+    </div>
+
+    <!-- Book Details Container -->
+    <div id="book-content" class="hidden min-h-[60vh] py-16 bg-gradient-to-br from-white via-indigo-50/30 to-violet-100/30 dark:from-slate-950 dark:via-indigo-950/10 dark:to-violet-950/10 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Book Loading State -->
+            <div id="book-loading" class="text-center py-20">
+                <div class="inline-flex p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-full animate-bounce mb-4">
+                    <i data-lucide="book" class="w-10 h-10 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <h4 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Reading from Library...</h4>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Please wait while we load the book details.</p>
+            </div>
+
+            <!-- Book Error/Not Found State -->
+            <div id="book-error" class="hidden text-center max-w-md mx-auto px-6 py-12 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200/50 dark:border-slate-800 shadow-xl transition-colors duration-300">
+                <div class="w-16 h-16 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i id="book-error-icon" data-lucide="book-x" class="w-8 h-8"></i>
+                </div>
+                <h3 id="book-error-title" class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Book Not Found</h3>
+                <p id="book-error-message" class="text-slate-600 dark:text-slate-400 mb-8">Sorry, this book is not available or could not be loaded.</p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button id="btn-retry-book" onclick="loadBookFromUrl()" class="hidden bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-6 py-3 rounded-full font-semibold transition-colors flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-800">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Retry
+                    </button>
+                    <button onclick="showNormalHomepage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full font-semibold transition-colors shadow-lg shadow-indigo-100 dark:shadow-none flex items-center justify-center gap-2">
+                        <i data-lucide="home" class="w-4 h-4"></i> Back to Home
+                    </button>
+                </div>
+            </div>
+
+            <!-- Book Details State -->
+            <div id="book-details" class="hidden max-w-4xl mx-auto">
+                <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200/50 dark:border-slate-800 shadow-2xl overflow-hidden transition-colors duration-300">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 p-6 sm:p-10 lg:p-12 items-center">
+                        <!-- Book Cover -->
+                        <div class="md:col-span-5 flex justify-center">
+                            <div class="relative w-full max-w-[240px] sm:max-w-[280px] aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-800 transform hover:scale-[1.02] transition-transform duration-300">
+                                <img id="book-cover" src="" alt="Book Cover" class="w-full h-full object-cover" loading="lazy" referrerpolicy="no-referrer">
+                                <div id="book-category-badge" class="absolute top-4 left-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg"></div>
+                            </div>
+                        </div>
+                        <!-- Book Info & Actions -->
+                        <div class="md:col-span-7 space-y-6">
+                            <div>
+                                <h2 id="book-title" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight"></h2>
+                                <p id="book-author" class="text-lg text-indigo-600 dark:text-indigo-400 font-medium mt-2"></p>
+                            </div>
+                            <div class="border-t border-slate-100 dark:border-slate-800 my-4"></div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Description</h4>
+                                <p id="book-description" class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm sm:text-base max-h-48 overflow-y-auto pr-2"></p>
+                            </div>
+                            <div class="border-t border-slate-100 dark:border-slate-800 my-4"></div>
+                            <div class="flex flex-col sm:flex-row flex-wrap gap-4">
+                                <!-- Read Button -->
+                                <a id="btn-read-book" href="#" target="_blank" class="flex-1 min-w-[150px] bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-2xl font-bold transition-all text-center flex items-center justify-center gap-2.5 shadow-lg shadow-indigo-100 dark:shadow-none hover:shadow-xl hover:-translate-y-0.5">
+                                    <i data-lucide="book-open" class="w-5 h-5"></i> Read Book
+                                </a>
+                                <!-- Share Button -->
+                                <button id="btn-share-book" onclick="shareBook()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-6 py-3.5 rounded-2xl font-bold transition-all flex items-center justify-center gap-2.5 hover:-translate-y-0.5 focus:outline-none">
+                                    <i id="share-icon" data-lucide="share-2" class="w-5 h-5"></i> Share Book
+                                </button>
+                            </div>
+                            <!-- Download Button -->
+                            <div class="pt-2">
+                                <a href="/AuraLearning.apk" download class="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-6 py-3.5 rounded-2xl font-semibold transition-all text-center flex items-center justify-center gap-2.5 hover:-translate-y-0.5">
+                                    <i data-lucide="download" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i> Download Aura Learning App
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     <!-- Footer Section -->
     <footer class="bg-slate-900 dark:bg-slate-950 text-slate-300 py-12 lg:py-16 transition-colors duration-300">
@@ -1015,6 +1097,263 @@
                 toggleAuthMode('login'); // Reset to login view
             }
         });
+        
+        // ==========================================
+        // Aura Learning Book Sharing Logic
+        // ==========================================
+
+        // Firebase Setup (for book collection fallback)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGhXIUlNqo2f4jDrzhUSlpaPPXZtf7_ns",
+            authDomain: "gen-lang-client-0011790296.firebaseapp.com",
+            projectId: "gen-lang-client-0011790296",
+            storageBucket: "gen-lang-client-0011790296.firebasestorage.app",
+            messagingSenderId: "445448484295",
+            appId: "1:445448484295:web:877ec18e29d1606c0c95e2"
+        };
+        if (window.firebase && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        // Shared Book State variables
+        let currentLoadedBook = null;
+
+        // Fetch book by slug or ID from either Supabase or Firestore
+        async function getBookFromDatabase(bookSlug) {
+            // 1. Try Supabase books table
+            try {
+                const { data: dataBySlug, error: errBySlug } = await supabaseClient.from('books').select('*').eq('slug', bookSlug);
+                if (dataBySlug && dataBySlug.length > 0) {
+                    return dataBySlug[0];
+                }
+                const { data: dataById, error: errById } = await supabaseClient.from('books').select('*').eq('id', bookSlug);
+                if (dataById && dataById.length > 0) {
+                    return dataById[0];
+                }
+            } catch (e) {
+                console.warn("Supabase book fetch failed or table doesn't exist yet:", e);
+            }
+
+            // 2. Try Firestore books collection
+            try {
+                if (window.firebase) {
+                    const firestoreDb = firebase.app().firestore("ai-studio-cc3207ac-206e-4c9a-bc25-a78c4661ef09");
+                    const docSnap = await firestoreDb.collection('books').doc(bookSlug).get();
+                    if (docSnap.exists) {
+                        return { id: docSnap.id, ...docSnap.data() };
+                    }
+                    const qSnap = await firestoreDb.collection('books').where('slug', '==', bookSlug).get();
+                    if (!qSnap.empty) {
+                        const doc = qSnap.docs[0];
+                        return { id: doc.id, ...doc.data() };
+                    }
+                }
+            } catch (e) {
+                console.warn("Firestore book fetch failed:", e);
+            }
+
+            return null;
+        }
+
+        // Hide/Show Book Detail or Homepage view
+        function showNormalHomepage() {
+            // Clean the book parameter from the URL gracefully
+            const url = new URL(window.location.href);
+            url.searchParams.delete('book');
+            window.history.pushState({}, '', url.pathname);
+
+            document.getElementById('homepage-content').classList.remove('hidden');
+            document.getElementById('book-content').classList.add('hidden');
+            
+            // Re-render countdown because we are back to landing page
+            updateCountdown();
+        }
+
+        // Parse query param and load book
+        async function loadBookFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookSlug = urlParams.get('book');
+
+            if (!bookSlug) {
+                // No book query, show standard landing page
+                document.getElementById('homepage-content').classList.remove('hidden');
+                document.getElementById('book-content').classList.add('hidden');
+                return;
+            }
+
+            // Book query exists, show book details section & hide landing page
+            document.getElementById('homepage-content').classList.add('hidden');
+            document.getElementById('book-content').classList.remove('hidden');
+
+            // Show loading, hide others
+            document.getElementById('book-loading').classList.remove('hidden');
+            document.getElementById('book-error').classList.add('hidden');
+            document.getElementById('book-details').classList.add('hidden');
+
+            // Offline Check
+            if (!navigator.onLine) {
+                showBookError(
+                    "You are currently offline", 
+                    "Please check your network connection and try again.", 
+                    "wifi-off", 
+                    true
+                );
+                return;
+            }
+
+            try {
+                const book = await getBookFromDatabase(bookSlug);
+                
+                if (book) {
+                    currentLoadedBook = book;
+                    renderBookDetails(book);
+                } else {
+                    // Book not found in both databases
+                    showBookError(
+                        "Book Not Found", 
+                        "Sorry, this book is not available in our library right now.", 
+                        "book-x", 
+                        false
+                    );
+                }
+            } catch (err) {
+                console.error("Error loading book:", err);
+                showBookError(
+                    "Failed to load Book", 
+                    "An unexpected server error occurred. Please try again later.", 
+                    "alert-triangle", 
+                    true
+                );
+            }
+        }
+
+        // Helper to display errors
+        function showBookError(title, message, iconName, showRetryButton = false) {
+            document.getElementById('book-loading').classList.add('hidden');
+            document.getElementById('book-details').classList.add('hidden');
+            
+            const errorDiv = document.getElementById('book-error');
+            errorDiv.classList.remove('hidden');
+
+            document.getElementById('book-error-title').textContent = title;
+            document.getElementById('book-error-message').textContent = message;
+
+            const iconEl = document.getElementById('book-error-icon');
+            if (iconEl) {
+                iconEl.setAttribute('data-lucide', iconName);
+            }
+
+            const retryBtn = document.getElementById('btn-retry-book');
+            if (retryBtn) {
+                if (showRetryButton) {
+                    retryBtn.classList.remove('hidden');
+                } else {
+                    retryBtn.classList.add('hidden');
+                }
+            }
+
+            // Re-render lucide icons
+            lucide.createIcons();
+        }
+
+        // Render the book detail card
+        function renderBookDetails(book) {
+            document.getElementById('book-loading').classList.add('hidden');
+            document.getElementById('book-error').classList.add('hidden');
+            
+            const detailsDiv = document.getElementById('book-details');
+            detailsDiv.classList.remove('hidden');
+
+            // Set content fields with safety fallbacks
+            document.getElementById('book-title').textContent = book.title || "Untitled Book";
+            document.getElementById('book-author').textContent = book.author ? `By ${book.author}` : "Unknown Author";
+            
+            const categoryBadge = document.getElementById('book-category-badge');
+            if (book.category) {
+                categoryBadge.textContent = book.category;
+                categoryBadge.classList.remove('hidden');
+            } else {
+                categoryBadge.classList.add('hidden');
+            }
+
+            document.getElementById('book-description').textContent = book.description || "No description provided for this study material.";
+            
+            // Image cover logic (flexible fields)
+            const coverImg = document.getElementById('book-cover');
+            coverImg.src = book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
+            coverImg.alt = `${book.title || 'Book'} Cover`;
+
+            // Read action button link
+            const readBtn = document.getElementById('btn-read-book');
+            readBtn.href = book.read_url || book.pdf_url || book.link || '#';
+            if (!book.read_url && !book.pdf_url && !book.link) {
+                readBtn.classList.add('opacity-50', 'pointer-events-none');
+                readBtn.title = "No reading link available";
+            } else {
+                readBtn.classList.remove('opacity-50', 'pointer-events-none');
+                readBtn.title = "";
+            }
+
+            // Re-render Lucide
+            lucide.createIcons();
+        }
+
+        // Share Book functionality (Clipboard Copy)
+        window.shareBook = function() {
+            if (!currentLoadedBook) return;
+            
+            const bookSlug = currentLoadedBook.slug || currentLoadedBook.id;
+            const shareUrl = `${window.location.origin}${window.location.pathname}?book=${encodeURIComponent(bookSlug)}`;
+
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                const btn = document.getElementById('btn-share-book');
+                const originalHtml = btn.innerHTML;
+
+                btn.innerHTML = `<i data-lucide="check" class="w-5 h-5 text-emerald-500"></i> Link Copied!`;
+                btn.classList.add('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-950/40', 'dark:text-emerald-400');
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    btn.innerHTML = `<i data-lucide="share-2" class="w-5 h-5"></i> Share Book`;
+                    btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-950/40', 'dark:text-emerald-400');
+                    lucide.createIcons();
+                }, 2000);
+            }).catch(err => {
+                console.error("Could not copy link:", err);
+            });
+        };
+
+        // Listen for back/forward navigation
+        window.addEventListener('popstate', () => {
+            loadBookFromUrl();
+        });
+
+        // Initialize and check online/offline events
+        window.addEventListener('online', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('book')) {
+                loadBookFromUrl();
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('book')) {
+                showBookError(
+                    "You are currently offline", 
+                    "Please check your network connection and try again.", 
+                    "wifi-off", 
+                    true
+                );
+            }
+        });
+
+        // Expose functions globally for manual calls
+        window.showNormalHomepage = showNormalHomepage;
+        window.loadBookFromUrl = loadBookFromUrl;
+
+        // Auto execute on load
+        loadBookFromUrl();
 
     </script>
 </body>

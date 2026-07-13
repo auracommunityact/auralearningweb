@@ -17,6 +17,42 @@
         }
       },
       "required": ["email", "createdAt"]
+    },
+    "Book": {
+      "title": "Book",
+      "description": "A study book or reading material in the library",
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "description": "Unique URL-friendly slug for the book"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the book"
+        },
+        "author": {
+          "type": "string",
+          "description": "Author or publisher of the book"
+        },
+        "category": {
+          "type": "string",
+          "description": "Academic subject or category"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the book"
+        },
+        "cover_url": {
+          "type": "string",
+          "description": "URL of the book's cover image"
+        },
+        "read_url": {
+          "type": "string",
+          "description": "URL link to read the book"
+        }
+      },
+      "required": ["slug", "title"]
     }
   },
   "firestore": {
@@ -25,6 +61,12 @@
         "$ref": "#/entities/WaitlistEntry"
       },
       "description": "Collection storing all waitlist signups"
+    },
+    "/books/{bookId}": {
+      "schema": {
+        "$ref": "#/entities/Book"
+      },
+      "description": "Collection storing all shared study books"
     }
   }
 }
