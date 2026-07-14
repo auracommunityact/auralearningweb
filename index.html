@@ -433,6 +433,30 @@
         </div>
     </section>
 
+    <!-- Library Section -->
+    <section id="library-section" class="py-24 bg-slate-50 dark:bg-slate-900/30 border-y border-slate-100 dark:border-slate-900 relative z-20 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4 transition-colors duration-300">Explore Our Library</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto transition-colors duration-300">Browse through our collection of premium study materials.</p>
+            </div>
+            
+            <div id="books-loading-list" class="text-center py-12 text-slate-500">
+                <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-3 text-indigo-600 dark:text-indigo-400"></i>
+                <p class="text-sm font-medium">Loading books...</p>
+            </div>
+            
+            <div id="books-empty-list" class="hidden text-center py-12 text-slate-500">
+                <i data-lucide="library" class="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-700"></i>
+                <p class="text-lg font-semibold">No books available</p>
+            </div>
+
+            <div id="books-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Books will be inserted here dynamically -->
+            </div>
+        </div>
+    </section>
+
     <!-- Core Features Section -->
     <section class="py-24 bg-white dark:bg-slate-950 relative z-20 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -554,43 +578,65 @@
             </div>
 
             <!-- Book Details State -->
-            <div id="book-details" class="hidden max-w-4xl mx-auto">
+            <div id="book-details" class="hidden max-w-5xl mx-auto">
                 <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200/50 dark:border-slate-800 shadow-2xl overflow-hidden transition-colors duration-300">
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 p-6 sm:p-10 lg:p-12 items-center">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 p-6 sm:p-10 lg:p-12 items-start">
                         <!-- Book Cover -->
                         <div class="md:col-span-5 flex justify-center">
-                            <div class="relative w-full max-w-[240px] sm:max-w-[280px] aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-800 transform hover:scale-[1.02] transition-transform duration-300">
+                            <div class="relative w-full max-w-[280px] sm:max-w-[320px] aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-800 transform hover:scale-[1.02] transition-transform duration-300">
                                 <img id="book-cover" src="" alt="Book Cover" class="w-full h-full object-cover" loading="lazy" referrerpolicy="no-referrer">
-                                <div id="book-category-badge" class="absolute top-4 left-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg"></div>
                             </div>
                         </div>
                         <!-- Book Info & Actions -->
                         <div class="md:col-span-7 space-y-6">
                             <div>
-                                <h2 id="book-title" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight"></h2>
-                                <p id="book-author" class="text-lg text-indigo-600 dark:text-indigo-400 font-medium mt-2"></p>
+                                <h2 id="book-title" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight mb-2"></h2>
+                                <p id="book-author" class="text-lg text-indigo-600 dark:text-indigo-400 font-medium"></p>
                             </div>
+                            
+                            <div class="flex flex-wrap gap-2" id="book-tags">
+                                <!-- Tags will be inserted here -->
+                            </div>
+
                             <div class="border-t border-slate-100 dark:border-slate-800 my-4"></div>
+                            
                             <div>
                                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Description</h4>
                                 <p id="book-description" class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm sm:text-base max-h-48 overflow-y-auto pr-2"></p>
                             </div>
+
                             <div class="border-t border-slate-100 dark:border-slate-800 my-4"></div>
-                            <div class="flex flex-col sm:flex-row flex-wrap gap-4">
-                                <!-- Read Button -->
-                                <a id="btn-read-book" href="#" target="_blank" class="flex-1 min-w-[150px] bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-2xl font-bold transition-all text-center flex items-center justify-center gap-2.5 shadow-lg shadow-indigo-100 dark:shadow-none hover:shadow-xl hover:-translate-y-0.5">
-                                    <i data-lucide="book-open" class="w-5 h-5"></i> Read Book
-                                </a>
-                                <!-- Share Button -->
-                                <button id="btn-share-book" onclick="shareBook()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-6 py-3.5 rounded-2xl font-bold transition-all flex items-center justify-center gap-2.5 hover:-translate-y-0.5 focus:outline-none">
-                                    <i id="share-icon" data-lucide="share-2" class="w-5 h-5"></i> Share Book
-                                </button>
+                            
+                            <!-- Premium Card -->
+                            <div class="bg-indigo-50 dark:bg-indigo-950/30 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-900">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="bg-indigo-600 text-white p-2 rounded-lg">
+                                        <i data-lucide="book-open" class="w-5 h-5"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-indigo-900 dark:text-indigo-100">Read this book in the Aura Learning App</h3>
+                                </div>
+                                <p class="text-sm text-indigo-700/80 dark:text-indigo-300 mb-5">
+                                    This book is available exclusively in the Aura Learning mobile app.
+                                    Download the app to read the complete PDF, bookmark pages, use AI Study Assistant, and enjoy the best reading experience.
+                                </p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <!-- Download App -->
+                                    <a href="/AuraLearning.apk" download class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 dark:shadow-none hover:shadow-xl hover:-translate-y-0.5">
+                                        <i data-lucide="download" class="w-5 h-5"></i> Download App
+                                    </a>
+                                    <!-- Open in App -->
+                                    <button onclick="openInApp()" class="flex-1 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5">
+                                        <i data-lucide="smartphone" class="w-5 h-5"></i> Open in App
+                                    </button>
+                                </div>
                             </div>
-                            <!-- Download Button -->
-                            <div class="pt-2">
-                                <a href="/AuraLearning.apk" download class="w-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-6 py-3.5 rounded-2xl font-semibold transition-all text-center flex items-center justify-center gap-2.5 hover:-translate-y-0.5">
-                                    <i data-lucide="download" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i> Download Aura Learning App
-                                </a>
+
+                            <!-- Share Button -->
+                            <div class="flex justify-end pt-2">
+                                <button id="btn-share-book" onclick="shareBook()" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium transition-colors flex items-center gap-2">
+                                    <i id="share-icon" data-lucide="share-2" class="w-4 h-4"></i> Share Book
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1167,6 +1213,7 @@
             
             // Re-render countdown because we are back to landing page
             updateCountdown();
+            loadLibraryBooks();
         }
 
         // Parse query param and load book
@@ -1178,6 +1225,7 @@
                 // No book query, show standard landing page
                 document.getElementById('homepage-content').classList.remove('hidden');
                 document.getElementById('book-content').classList.add('hidden');
+                loadLibraryBooks();
                 return;
             }
 
@@ -1264,39 +1312,87 @@
             const detailsDiv = document.getElementById('book-details');
             detailsDiv.classList.remove('hidden');
 
-            // Set content fields with safety fallbacks
-            document.getElementById('book-title').textContent = book.title || "Untitled Book";
-            document.getElementById('book-author').textContent = book.author ? `By ${book.author}` : "Unknown Author";
+            const title = book.name || book.title || "Untitled Book";
+            document.getElementById('book-title').textContent = title;
             
-            const categoryBadge = document.getElementById('book-category-badge');
-            if (book.category) {
-                categoryBadge.textContent = book.category;
-                categoryBadge.classList.remove('hidden');
-            } else {
-                categoryBadge.classList.add('hidden');
+            const author = book.publisher || book.author;
+            document.getElementById('book-author').textContent = author ? `By ${author}` : "Aura Learning Library";
+            
+            // Handle Tags (Subject, Class, Board, Language, Pages)
+            const tagsContainer = document.getElementById('book-tags');
+            if (tagsContainer) {
+                tagsContainer.innerHTML = '';
+                const addTag = (value, icon) => {
+                    if (!value) return;
+                    const span = document.createElement('span');
+                    span.className = "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5";
+                    span.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5"></i> ${value}`;
+                    tagsContainer.appendChild(span);
+                };
+
+                addTag(book.subject || book.category, 'book-marked');
+                addTag(book.class || book.grade, 'graduation-cap');
+                addTag(book.board, 'building-2');
+                addTag(book.language, 'languages');
+                if(book.total_pages || book.pages) {
+                   addTag(`${book.total_pages || book.pages} pages`, 'file-text');
+                }
             }
 
             document.getElementById('book-description').textContent = book.description || "No description provided for this study material.";
             
             // Image cover logic (flexible fields)
             const coverImg = document.getElementById('book-cover');
-            coverImg.src = book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
-            coverImg.alt = `${book.title || 'Book'} Cover`;
+            const coverUrl = book.cover_image || book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
+            coverImg.src = coverUrl;
+            coverImg.alt = `${title} Cover`;
 
-            // Read action button link
-            const readBtn = document.getElementById('btn-read-book');
-            readBtn.href = book.read_url || book.pdf_url || book.link || '#';
-            if (!book.read_url && !book.pdf_url && !book.link) {
-                readBtn.classList.add('opacity-50', 'pointer-events-none');
-                readBtn.title = "No reading link available";
-            } else {
-                readBtn.classList.remove('opacity-50', 'pointer-events-none');
-                readBtn.title = "";
-            }
+            updateMetaTags(title, book.description, coverUrl);
 
             // Re-render Lucide
             lucide.createIcons();
         }
+
+        function updateMetaTags(title, description, imageUrl) {
+            const setMeta = (property, content) => {
+                let el = document.querySelector(`meta[property="${property}"], meta[name="${property}"]`);
+                if (!el) {
+                    el = document.createElement('meta');
+                    if (property.startsWith('og:')) el.setAttribute('property', property);
+                    else el.setAttribute('name', property);
+                    document.head.appendChild(el);
+                }
+                el.setAttribute('content', content);
+            };
+
+            const pageTitle = `${title} - Aura Learning`;
+            document.title = pageTitle;
+            setMeta('og:title', pageTitle);
+            setMeta('twitter:title', pageTitle);
+            
+            if (description) {
+                const shortDesc = description.length > 160 ? description.substring(0, 157) + '...' : description;
+                setMeta('description', shortDesc);
+                setMeta('og:description', shortDesc);
+                setMeta('twitter:description', shortDesc);
+            }
+            
+            if (imageUrl) {
+                setMeta('og:image', imageUrl);
+                setMeta('twitter:image', imageUrl);
+                setMeta('twitter:card', 'summary_large_image');
+            }
+        }
+
+        window.openInApp = function() {
+            if (!currentLoadedBook) return;
+            const bookId = currentLoadedBook.id || currentLoadedBook.slug;
+            // Use intent URL scheme or custom app scheme
+            const appUrl = `auralearning://book/${bookId}`;
+            
+            // Try opening the app
+            window.location.href = appUrl;
+        };
 
         // Share Book functionality (Clipboard Copy)
         window.shareBook = function() {
@@ -1322,6 +1418,84 @@
                 console.error("Could not copy link:", err);
             });
         };
+
+        // Render Books List on Homepage
+        async function loadLibraryBooks() {
+            const loadingEl = document.getElementById('books-loading-list');
+            const emptyEl = document.getElementById('books-empty-list');
+            const gridEl = document.getElementById('books-grid');
+            
+            if (!loadingEl || !emptyEl || !gridEl) return;
+
+            // If already loaded, skip
+            if (gridEl.children.length > 0) return;
+
+            try {
+                // Fetch books from Supabase
+                const { data, error } = await supabaseClient
+                    .from('books')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                loadingEl.classList.add('hidden');
+
+                if (error || !data || data.length === 0) {
+                    emptyEl.classList.remove('hidden');
+                    return;
+                }
+
+                gridEl.innerHTML = '';
+                gridEl.classList.remove('hidden');
+
+                data.forEach(book => {
+                    const title = book.name || book.title || "Untitled Book";
+                    const desc = book.description || "No description available.";
+                    const coverUrl = book.cover_image || book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
+                    
+                    const dateStr = book.updated_at || book.created_at;
+                    const dateFormatted = dateStr ? new Date(dateStr).toLocaleDateString() : 'Recently Added';
+
+                    let tagsHtml = '';
+                    if (book.class || book.grade) tagsHtml += `<span class="bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded">${book.class || book.grade}</span>`;
+                    if (book.board) tagsHtml += `<span class="bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded">${book.board}</span>`;
+                    if (book.language) tagsHtml += `<span class="bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded">${book.language}</span>`;
+
+                    const card = document.createElement('a');
+                    card.href = `?book=${book.slug || book.id}`;
+                    card.className = "group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer";
+                    
+                    card.innerHTML = `
+                        <div class="relative aspect-[3/4] overflow-hidden bg-slate-100 dark:bg-slate-800">
+                            <img src="${coverUrl}" alt="${title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop'">
+                            <div class="absolute top-3 right-3 bg-indigo-600/90 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-sm">
+                                ${book.subject || book.category || 'General'}
+                            </div>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="font-bold text-lg text-slate-900 dark:text-white leading-tight mb-2 line-clamp-2">${title}</h3>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-4 flex-grow">${desc}</p>
+                            
+                            <div class="flex flex-wrap gap-1.5 mb-4">
+                                ${tagsHtml}
+                            </div>
+                            
+                            <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-500 mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${dateFormatted}</span>
+                                <span class="font-medium text-indigo-600 dark:text-indigo-400 flex items-center gap-1 group-hover:gap-2 transition-all">Details <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
+                            </div>
+                        </div>
+                    `;
+                    gridEl.appendChild(card);
+                });
+                
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error("Error loading library books:", err);
+                loadingEl.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+            }
+        }
 
         // Listen for back/forward navigation
         window.addEventListener('popstate', () => {
@@ -1351,9 +1525,15 @@
         // Expose functions globally for manual calls
         window.showNormalHomepage = showNormalHomepage;
         window.loadBookFromUrl = loadBookFromUrl;
+        window.loadLibraryBooks = loadLibraryBooks;
 
         // Auto execute on load
-        loadBookFromUrl();
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('book')) {
+            loadBookFromUrl();
+        } else {
+            loadLibraryBooks();
+        }
 
     </script>
 </body>
