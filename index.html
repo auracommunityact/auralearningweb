@@ -1164,38 +1164,41 @@
         // Shared Book State variables
         let currentLoadedBook = null;
 
-        // Fetch book by slug or ID from either Supabase or Firestore
+        // Fetch book from Supabase
         async function getBookFromDatabase(bookSlug) {
-            // 1. Try Supabase books table
+            console.log("[BookLink] Received URL parameter (book):", bookSlug);
+            
             try {
-                const { data: dataBySlug, error: errBySlug } = await supabaseClient.from('books').select('*').eq('slug', bookSlug);
-                if (dataBySlug && dataBySlug.length > 0) {
-                    return dataBySlug[0];
+                // If the parameter looks like a UUID, query by id first
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (uuidRegex.test(bookSlug)) {
+                    console.log("[BookLink] Querying Supabase 'books' table by id:", bookSlug);
+                    const { data: dataById, error: errById } = await supabaseClient.from('books').select('*').eq('id', bookSlug);
+                    if (dataById && dataById.length > 0) {
+                        console.log("[BookLink] Found book by id:", dataById[0]);
+                        return dataById[0];
+                    }
                 }
-                const { data: dataById, error: errById } = await supabaseClient.from('books').select('*').eq('id', bookSlug);
-                if (dataById && dataById.length > 0) {
-                    return dataById[0];
-                }
-            } catch (e) {
-                console.warn("Supabase book fetch failed or table doesn't exist yet:", e);
-            }
 
-            // 2. Try Firestore books collection
-            try {
-                if (window.firebase) {
-                    const firestoreDb = firebase.app().firestore("ai-studio-cc3207ac-206e-4c9a-bc25-a78c4661ef09");
-                    const docSnap = await firestoreDb.collection('books').doc(bookSlug).get();
-                    if (docSnap.exists) {
-                        return { id: docSnap.id, ...docSnap.data() };
-                    }
-                    const qSnap = await firestoreDb.collection('books').where('slug', '==', bookSlug).get();
-                    if (!qSnap.empty) {
-                        const doc = qSnap.docs[0];
-                        return { id: doc.id, ...doc.data() };
-                    }
+                // If not found by ID (or not a UUID), try searching by bookName (case-insensitive)
+                console.log("[BookLink] Querying Supabase 'books' table by bookName (ilike):", bookSlug);
+                const { data: dataByName, error: errByName } = await supabaseClient.from('books').select('*').ilike('bookName', bookSlug);
+                if (dataByName && dataByName.length > 0) {
+                    console.log("[BookLink] Found book by bookName:", dataByName[0]);
+                    return dataByName[0];
                 }
+                
+                // Fallback for title just in case the column name changes
+                console.log("[BookLink] Querying Supabase 'books' table by title (ilike):", bookSlug);
+                const { data: dataByTitle, error: errByTitle } = await supabaseClient.from('books').select('*').ilike('title', bookSlug);
+                if (dataByTitle && dataByTitle.length > 0) {
+                    console.log("[BookLink] Found book by title:", dataByTitle[0]);
+                    return dataByTitle[0];
+                }
+
+                console.log("[BookLink] Book not found in database.");
             } catch (e) {
-                console.warn("Firestore book fetch failed:", e);
+                console.warn("[BookLink] Supabase book fetch failed:", e);
             }
 
             return null;
@@ -1312,7 +1315,7 @@
             const detailsDiv = document.getElementById('book-details');
             detailsDiv.classList.remove('hidden');
 
-            const title = book.name || book.title || "Untitled Book";
+            const title = book.bookName || book.name || book.title || "Untitled Book";
             document.getElementById('book-title').textContent = title;
             
             const author = book.publisher || book.author;
@@ -1331,7 +1334,7 @@
                 };
 
                 addTag(book.subject || book.category, 'book-marked');
-                addTag(book.class || book.grade, 'graduation-cap');
+                addTag(book.className || book.class || book.grade, 'graduation-cap');
                 addTag(book.board, 'building-2');
                 addTag(book.language, 'languages');
                 if(book.total_pages || book.pages) {
@@ -1343,7 +1346,7 @@
             
             // Image cover logic (flexible fields)
             const coverImg = document.getElementById('book-cover');
-            const coverUrl = book.cover_image || book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
+            const coverUrl = book.coverImage || book.cover_image || book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
             coverImg.src = coverUrl;
             coverImg.alt = `${title} Cover`;
 
@@ -1435,7 +1438,7 @@
                 const { data, error } = await supabaseClient
                     .from('books')
                     .select('*')
-                    .order('created_at', { ascending: false });
+                    .order('createdAt', { ascending: false }); // Note: updated from created_at to createdAt based on schema
 
                 loadingEl.classList.add('hidden');
 
@@ -1448,15 +1451,23 @@
                 gridEl.classList.remove('hidden');
 
                 data.forEach(book => {
-                    const title = book.name || book.title || "Untitled Book";
+                    const title = book.bookName || book.name || book.title || "Untitled Book";
                     const desc = book.description || "No description available.";
-                    const coverUrl = book.cover_image || book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
+                    const coverUrl = book.coverImage || book.cover_image || book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
                     
-                    const dateStr = book.updated_at || book.created_at;
-                    const dateFormatted = dateStr ? new Date(dateStr).toLocaleDateString() : 'Recently Added';
+                    const dateStr = book.updated_at || book.createdAt || book.created_at;
+                    let dateFormatted = 'Recently Added';
+                    if (dateStr) {
+                         // Some unix timestamps are in ms (like 1783767379396)
+                         const dateObj = new Date(typeof dateStr === 'number' ? dateStr : dateStr);
+                         if (!isNaN(dateObj.getTime())) {
+                             dateFormatted = dateObj.toLocaleDateString();
+                         }
+                    }
 
                     let tagsHtml = '';
-                    if (book.class || book.grade) tagsHtml += `<span class="bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded">${book.class || book.grade}</span>`;
+                    const classOrGrade = book.className || book.class || book.grade;
+                    if (classOrGrade) tagsHtml += `<span class="bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded">${classOrGrade}</span>`;
                     if (book.board) tagsHtml += `<span class="bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded">${book.board}</span>`;
                     if (book.language) tagsHtml += `<span class="bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded">${book.language}</span>`;
 
