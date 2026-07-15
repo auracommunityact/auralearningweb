@@ -1,6 +1,6 @@
 {
   "name": "Aura Pre-Registration",
-  "description": "Pre-registration page for Aura Learning App with countdown, Gemini chatbot, and Gmail automated emails.",
+  "description": "Aura Learning App with library books grid, APKPure download button, Gemini chatbot, and Gmail automated emails.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
