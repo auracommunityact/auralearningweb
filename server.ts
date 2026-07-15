@@ -3,10 +3,16 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { google } from "googleapis";
+import { createClient } from "@supabase/supabase-js";
 
 const app = express();
 app.use(express.json());
 const PORT = 3000;
+
+// Initialize Supabase Client for dynamic sitemap and routing
+const SUPABASE_URL = 'https://qxoqflrqpwlythgqmjtq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4b3FmbHJxcHdseXRoZ3FtanRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxODIxMTQsImV4cCI6MjA5Nzc1ODExNH0.cJ3hIsEyRtH1m_nmyzwjrdvzsbGIKIiChnmXAjgFRfo';
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Initialize Gemini API
 const ai = new GoogleGenAI({ 
@@ -134,6 +140,62 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
+// API Route: Dynamic sitemap.xml that automatically updates with new books/pages
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const host = req.get('host') || 'ais-pre-md445vldjd7jquxyou3ama-1062068490011.asia-southeast1.run.app';
+    const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+    const baseUrl = `${protocol}://${host}`;
+
+    // Query books from Supabase to automatically reflect new books in the sitemap
+    const { data: books } = await supabaseClient
+      .from('books')
+      .select('id, slug');
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    
+    // Homepage (priority 1.0, weekly change frequency)
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}/</loc>\n`;
+    xml += `    <changefreq>weekly</changefreq>\n`;
+    xml += `    <priority>1.0</priority>\n`;
+    xml += `  </url>\n`;
+
+    // Static public pages (priority 0.8, weekly change frequency)
+    const otherPages = ['/updates.html', '/admin.html'];
+    for (const page of otherPages) {
+      xml += `  <url>\n`;
+      xml += `    <loc>${baseUrl}${page}</loc>\n`;
+      xml += `    <changefreq>weekly</changefreq>\n`;
+      xml += `    <priority>0.8</priority>\n`;
+      xml += `  </url>\n`;
+    }
+
+    // Dynamic book pages
+    if (books && books.length > 0) {
+      for (const book of books) {
+        const bookSlug = book.slug || book.id;
+        if (bookSlug) {
+          xml += `  <url>\n`;
+          xml += `    <loc>${baseUrl}/?book=${encodeURIComponent(bookSlug)}</loc>\n`;
+          xml += `    <changefreq>weekly</changefreq>\n`;
+          xml += `    <priority>0.8</priority>\n`;
+          xml += `  </url>\n`;
+        }
+      }
+    }
+
+    xml += `</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.status(200).send(xml);
+  } catch (error) {
+    console.error("Sitemap XML generation error:", error);
+    res.status(500).send("Error generating sitemap");
+  }
+});
+
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -149,7 +211,11 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    // Enable browser caching for 1 day
+    app.use(express.static(distPath, {
+      maxAge: '1d',
+      etag: true
+    }));
     
     // Explicitly handle /sitemap to redirect to /sitemap.xml
     app.get('/sitemap', (req, res) => {
