@@ -10,7 +10,7 @@ export function ShareSection({ onShowToast }: { onShowToast: (msg: string) => vo
     }
   }, []);
 
-  const shareUrl = "https://auralearningwebsite.netlify.app";
+  const shareUrl = "https://aura.auralearning.workers.dev";
   const shareText = "Check out Aura Learning and spread the calm! 🧘‍♂️✨";
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedText = encodeURIComponent(shareText);

@@ -143,7 +143,7 @@ app.post('/api/signup', async (req, res) => {
 // API Route: Dynamic sitemap.xml that automatically updates with new books/pages
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const host = req.get('host') || 'ais-pre-md445vldjd7jquxyou3ama-1062068490011.asia-southeast1.run.app';
+    const host = req.get('host') || 'aura.auralearning.workers.dev';
     const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
     const baseUrl = `${protocol}://${host}`;
 
@@ -162,12 +162,12 @@ app.get('/sitemap.xml', async (req, res) => {
     xml += `    <priority>1.0</priority>\n`;
     xml += `  </url>\n`;
 
-    // Static public pages (priority 0.8, weekly change frequency)
-    const otherPages = ['/updates.html', '/admin.html'];
+    // Static public pages (priority 0.8, monthly change frequency)
+    const otherPages = ['/about', '/contact', '/privacy', '/terms', '/updates.html', '/admin.html'];
     for (const page of otherPages) {
       xml += `  <url>\n`;
       xml += `    <loc>${baseUrl}${page}</loc>\n`;
-      xml += `    <changefreq>weekly</changefreq>\n`;
+      xml += `    <changefreq>monthly</changefreq>\n`;
       xml += `    <priority>0.8</priority>\n`;
       xml += `  </url>\n`;
     }
@@ -179,7 +179,7 @@ app.get('/sitemap.xml', async (req, res) => {
         if (bookSlug) {
           xml += `  <url>\n`;
           xml += `    <loc>${baseUrl}/?book=${encodeURIComponent(bookSlug)}</loc>\n`;
-          xml += `    <changefreq>weekly</changefreq>\n`;
+          xml += `    <changefreq>monthly</changefreq>\n`;
           xml += `    <priority>0.8</priority>\n`;
           xml += `  </url>\n`;
         }
