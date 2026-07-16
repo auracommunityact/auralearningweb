@@ -1248,7 +1248,9 @@
             document.getElementById('book-content').classList.add('hidden');
             
             // Re-render countdown because we are back to landing page
-            updateCountdown();
+            if (typeof updateCountdown === 'function') {
+                updateCountdown();
+            }
             loadLibraryBooks();
         }
 
