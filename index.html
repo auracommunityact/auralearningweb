@@ -149,6 +149,50 @@
         </div>
     </nav>
 
+    <!-- Content Not Found Banner -->
+    <div id="not-found-banner" class="hidden bg-indigo-600 dark:bg-indigo-700 text-white border-b border-indigo-500/30 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+                <span class="flex p-1.5 bg-indigo-700 dark:bg-indigo-800 rounded-lg text-white shrink-0">
+                    <i data-lucide="info" class="w-5 h-5"></i>
+                </span>
+                <p class="font-medium text-sm sm:text-base">
+                    Download the Aura Learning app for the best learning experience.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="/AuraLearning.apk" download class="bg-white hover:bg-slate-100 text-indigo-600 px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Download App
+                </a>
+                <button onclick="dismissNotFoundBanner()" class="p-1.5 text-indigo-200 hover:text-white rounded-lg transition-colors focus:outline-none" aria-label="Dismiss banner">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Not Found Modal -->
+    <div id="not-found-modal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="modal-content bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200/50 dark:border-slate-800 shadow-2xl p-6 sm:p-10 max-w-md w-full text-center relative transition-colors duration-300">
+            <div class="w-16 h-16 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="alert-circle" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Content Not Found</h3>
+            <p class="text-slate-600 dark:text-slate-400 mb-8 text-sm sm:text-base">
+                Sorry, the requested content is not available on the web or could not be found. 
+                Download the official Aura Learning mobile app to explore our complete list of courses, books, and resources.
+            </p>
+            <div class="flex flex-col gap-3">
+                <a href="/AuraLearning.apk" download class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 dark:shadow-none hover:-translate-y-0.5">
+                    <i data-lucide="download" class="w-5 h-5"></i> Download Aura Learning
+                </a>
+                <button onclick="closeNotFoundModal()" class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar Overlay -->
     <div id="sidebar-overlay" class="sidebar-overlay fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40"></div>
 
@@ -634,9 +678,9 @@
                                     <div class="bg-indigo-600 text-white p-2 rounded-lg">
                                         <i data-lucide="book-open" class="w-5 h-5"></i>
                                     </div>
-                                    <h3 class="text-lg font-bold text-indigo-900 dark:text-indigo-100">Read this book in the Aura Learning App</h3>
+                                    <h3 id="app-promo-title" class="text-lg font-bold text-indigo-900 dark:text-indigo-100">Read this book in the Aura Learning App</h3>
                                 </div>
-                                <p class="text-sm text-indigo-700/80 dark:text-indigo-300 mb-5">
+                                <p id="app-promo-desc" class="text-sm text-indigo-700/80 dark:text-indigo-300 mb-5">
                                     This book is available exclusively in the Aura Learning mobile app.
                                     Download the app to read the complete PDF, bookmark pages, use AI Study Assistant, and enjoy the best reading experience.
                                 </p>
@@ -1190,11 +1234,15 @@
         }
 
         // Hide/Show Book Detail or Homepage view
-        function showNormalHomepage() {
-            // Clean the book parameter from the URL gracefully
-            const url = new URL(window.location.href);
-            url.searchParams.delete('book');
-            window.history.pushState({}, '', url.pathname);
+        function showNormalHomepage(updateUrl = true) {
+            if (updateUrl) {
+                const url = new URL(window.location.href);
+                url.pathname = '/';
+                url.searchParams.delete('book');
+                url.searchParams.delete('content-not-found');
+                url.searchParams.delete('banner');
+                window.history.pushState({}, '', url.toString());
+            }
 
             document.getElementById('homepage-content').classList.remove('hidden');
             document.getElementById('book-content').classList.add('hidden');
@@ -1204,29 +1252,231 @@
             loadLibraryBooks();
         }
 
-        // Parse query param and load book
-        async function loadBookFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const bookSlug = urlParams.get('book');
+        // Video fetcher
+        async function getVideoFromDatabase(videoSlug) {
+            console.log("[VideoLink] Querying video:", videoSlug);
+            try {
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (uuidRegex.test(videoSlug)) {
+                    const { data } = await supabaseClient.from('videos').select('*').eq('id', videoSlug);
+                    if (data && data.length > 0) return data[0];
+                }
 
-            if (!bookSlug) {
-                // No book query, show standard landing page
-                document.getElementById('homepage-content').classList.remove('hidden');
-                document.getElementById('book-content').classList.add('hidden');
-                loadLibraryBooks();
+                const { data: dataByName } = await supabaseClient.from('videos').select('*').ilike('title', videoSlug);
+                if (dataByName && dataByName.length > 0) return dataByName[0];
+                
+                const { data: dataByChapter } = await supabaseClient.from('videos').select('*').ilike('chapter', videoSlug);
+                if (dataByChapter && dataByChapter.length > 0) return dataByChapter[0];
+            } catch (e) {
+                console.warn("[VideoLink] Supabase video fetch failed:", e);
+            }
+            return null;
+        }
+
+        // Course fetcher
+        async function getCourseFromDatabase(courseSlug) {
+            console.log("[CourseLink] Querying course:", courseSlug);
+            try {
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (uuidRegex.test(courseSlug)) {
+                    const { data } = await supabaseClient.from('courses').select('*').eq('id', courseSlug);
+                    if (data && data.length > 0) return data[0];
+                }
+
+                const { data: dataByName } = await supabaseClient.from('courses').select('*').ilike('name', courseSlug);
+                if (dataByName && dataByName.length > 0) return dataByName[0];
+            } catch (e) {
+                console.warn("[CourseLink] Supabase course fetch failed:", e);
+            }
+            return null;
+        }
+
+        // Page fetcher
+        async function getPageFromDatabase(pageSlug) {
+            return null; // public.pages table does not exist
+        }
+
+        // Banner and Modal control functions
+        window.dismissNotFoundBanner = function() {
+            document.getElementById('not-found-banner').classList.add('hidden');
+        };
+
+        window.closeNotFoundModal = function() {
+            document.getElementById('not-found-modal').classList.remove('open');
+        };
+
+        window.showContentNotFoundBanner = function() {
+            const banner = document.getElementById('not-found-banner');
+            if (banner) {
+                banner.classList.remove('hidden');
+            }
+            const modal = document.getElementById('not-found-modal');
+            if (modal) {
+                modal.classList.add('open');
+            }
+            
+            // Clean s_error param from URL gracefully so refreshing doesn't keep showing it
+            const url = new URL(window.location.href);
+            url.searchParams.delete('content-not-found');
+            url.searchParams.delete('banner');
+            window.history.pushState({}, '', url.pathname);
+            
+            lucide.createIcons();
+        };
+
+        window.redirectToHomeWithBanner = function() {
+            const url = new URL(window.location.origin);
+            url.searchParams.set('content-not-found', 'true');
+            window.location.href = url.toString();
+        };
+
+        // Render Shared Content
+        function renderSharedContent(type, data) {
+            document.getElementById('book-loading').classList.add('hidden');
+            document.getElementById('book-error').classList.add('hidden');
+            
+            const detailsDiv = document.getElementById('book-details');
+            detailsDiv.classList.remove('hidden');
+
+            const title = data.title || data.bookName || data.name || "Untitled Content";
+            document.getElementById('book-title').textContent = title;
+            
+            const subtitleEl = document.getElementById('book-author');
+            let subtitle = "";
+            if (type === 'book') {
+                const author = data.publisher || data.author;
+                subtitle = author ? `By ${author}` : "Aura Learning Library";
+            } else if (type === 'video') {
+                subtitle = data.teacher ? `Video Lesson by ${data.teacher}` : "Aura Video Lesson";
+            } else if (type === 'course') {
+                subtitle = "Aura Learning Comprehensive Course";
+            } else {
+                subtitle = "Aura Learning Resource";
+            }
+            subtitleEl.textContent = subtitle;
+
+            // Handle Tags
+            const tagsContainer = document.getElementById('book-tags');
+            if (tagsContainer) {
+                tagsContainer.innerHTML = '';
+                const addTag = (value, icon) => {
+                    if (!value) return;
+                    const span = document.createElement('span');
+                    span.className = "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5";
+                    span.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5"></i> ${value}`;
+                    tagsContainer.appendChild(span);
+                };
+
+                addTag(type.charAt(0).toUpperCase() + type.slice(1), 'tag');
+                addTag(data.subject || data.category, 'book-marked');
+                addTag(data.className || data.class || data.grade, 'graduation-cap');
+                addTag(data.board, 'building-2');
+                addTag(data.language, 'languages');
+                
+                if (type === 'book' && (data.total_pages || data.pages)) {
+                    addTag(`${data.total_pages || data.pages} pages`, 'file-text');
+                } else if (type === 'video' && data.duration) {
+                    addTag(data.duration, 'clock');
+                }
+            }
+
+            document.getElementById('book-description').textContent = data.description || `Access this ${type} on the Aura Learning mobile application.`;
+
+            // Image cover / thumbnail
+            const coverImg = document.getElementById('book-cover');
+            const defaultCover = 'https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png';
+            const coverUrl = data.thumbnail || data.coverImage || data.cover_image || data.cover_url || data.image_url || data.cover || defaultCover;
+            coverImg.src = coverUrl;
+            coverImg.alt = `${title} Preview`;
+
+            // Update Premium card text dynamically
+            const promoTitle = document.getElementById('app-promo-title');
+            if (promoTitle) {
+                promoTitle.textContent = `Open this ${type} in the Aura Learning App`;
+            }
+            const promoDesc = document.getElementById('app-promo-desc');
+            if (promoDesc) {
+                promoDesc.textContent = `This ${type} is available on the Aura Learning mobile app. Download the app to access full interactive lessons, watch videos, read books, take quizzes, and enjoy the best learning experience.`;
+            }
+
+            // Share button renaming
+            const shareBtn = document.getElementById('btn-share-book');
+            if (shareBtn) {
+                shareBtn.innerHTML = `<i id="share-icon" data-lucide="share-2" class="w-4 h-4"></i> Share ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+            }
+
+            updateMetaTags(title, data.description, coverUrl);
+
+            // Re-render Lucide
+            lucide.createIcons();
+        }
+
+        // Router function
+        async function handleClientRouting() {
+            const path = window.location.pathname;
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Check if server pre-injected data
+            if (window.__AURA_INITIAL_DATA__ && window.__AURA_INITIAL_DATA__.data) {
+                console.log("[Router] Server-injected initial data found:", window.__AURA_INITIAL_DATA__);
+                const { type, data } = window.__AURA_INITIAL_DATA__;
+                currentLoadedBook = { ...data, __aura_type__: type };
+                
+                // Toggle sections
+                document.getElementById('homepage-content').classList.add('hidden');
+                document.getElementById('book-content').classList.remove('hidden');
+                
+                renderSharedContent(type, data);
+                
+                // Clear after initial load so navigation state changes work normally
+                window.__AURA_INITIAL_DATA__ = null;
                 return;
             }
 
-            // Book query exists, show book details section & hide landing page
+            // Fallback to legacy ?book= URL parameters
+            const bookParam = urlParams.get('book');
+            if (bookParam) {
+                loadContentFromSlug('book', bookParam);
+                return;
+            }
+
+            // Check dynamic path routing
+            const courseMatch = path.match(/^\/course\/([^/]+)/);
+            const videoMatch = path.match(/^\/video\/([^/]+)/);
+            const bookMatch = path.match(/^\/book\/([^/]+)/);
+            const pageMatch = path.match(/^\/page\/([^/]+)/);
+
+            if (courseMatch) {
+                loadContentFromSlug('course', courseMatch[1]);
+            } else if (videoMatch) {
+                loadContentFromSlug('video', videoMatch[1]);
+            } else if (bookMatch) {
+                loadContentFromSlug('book', bookMatch[1]);
+            } else if (pageMatch) {
+                loadContentFromSlug('page', pageMatch[1]);
+            } else {
+                // Check if redirected from content not found on server
+                const showBanner = urlParams.get('content-not-found') === 'true' || urlParams.get('banner') === 'true';
+                if (showBanner) {
+                    showContentNotFoundBanner();
+                } else {
+                    // Normalize standard homepage
+                    showNormalHomepage(false);
+                }
+            }
+        }
+
+        // Load Content by Type and Slug Client-side
+        async function loadContentFromSlug(type, slug) {
+            console.log(`[Router] Client fetching ${type}:`, slug);
+
             document.getElementById('homepage-content').classList.add('hidden');
             document.getElementById('book-content').classList.remove('hidden');
 
-            // Show loading, hide others
             document.getElementById('book-loading').classList.remove('hidden');
             document.getElementById('book-error').classList.add('hidden');
             document.getElementById('book-details').classList.add('hidden');
 
-            // Offline Check
             if (!navigator.onLine) {
                 showBookError(
                     "You are currently offline", 
@@ -1238,29 +1488,38 @@
             }
 
             try {
-                const book = await getBookFromDatabase(bookSlug);
-                
-                if (book) {
-                    currentLoadedBook = book;
-                    renderBookDetails(book);
+                let data = null;
+                if (type === 'book') {
+                    data = await getBookFromDatabase(slug);
+                } else if (type === 'video') {
+                    data = await getVideoFromDatabase(slug);
+                } else if (type === 'course') {
+                    data = await getCourseFromDatabase(slug);
+                } else if (type === 'page') {
+                    data = await getPageFromDatabase(slug);
+                }
+
+                if (data) {
+                    currentLoadedBook = { ...data, __aura_type__: type };
+                    renderSharedContent(type, data);
                 } else {
-                    // Book not found in both databases
-                    showBookError(
-                        "Book Not Found", 
-                        "Sorry, this book is not available in our library right now.", 
-                        "book-x", 
-                        false
-                    );
+                    console.warn(`[Router] ${type}/${slug} content not found client-side, redirecting.`);
+                    redirectToHomeWithBanner();
                 }
             } catch (err) {
-                console.error("Error loading book:", err);
+                console.error(`[Router] Error loading ${type}:`, err);
                 showBookError(
-                    "Failed to load Book", 
+                    "Failed to load content", 
                     "An unexpected server error occurred. Please try again later.", 
                     "alert-triangle", 
                     true
                 );
             }
+        }
+
+        // Backward compatibility shim
+        async function loadBookFromUrl() {
+            handleClientRouting();
         }
 
         // Helper to display errors
@@ -1292,53 +1551,9 @@
             lucide.createIcons();
         }
 
-        // Render the book detail card
+        // Render the book detail card (deprecated, shimmed)
         function renderBookDetails(book) {
-            document.getElementById('book-loading').classList.add('hidden');
-            document.getElementById('book-error').classList.add('hidden');
-            
-            const detailsDiv = document.getElementById('book-details');
-            detailsDiv.classList.remove('hidden');
-
-            const title = book.bookName || book.name || book.title || "Untitled Book";
-            document.getElementById('book-title').textContent = title;
-            
-            const author = book.publisher || book.author;
-            document.getElementById('book-author').textContent = author ? `By ${author}` : "Aura Learning Library";
-            
-            // Handle Tags (Subject, Class, Board, Language, Pages)
-            const tagsContainer = document.getElementById('book-tags');
-            if (tagsContainer) {
-                tagsContainer.innerHTML = '';
-                const addTag = (value, icon) => {
-                    if (!value) return;
-                    const span = document.createElement('span');
-                    span.className = "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5";
-                    span.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5"></i> ${value}`;
-                    tagsContainer.appendChild(span);
-                };
-
-                addTag(book.subject || book.category, 'book-marked');
-                addTag(book.className || book.class || book.grade, 'graduation-cap');
-                addTag(book.board, 'building-2');
-                addTag(book.language, 'languages');
-                if(book.total_pages || book.pages) {
-                   addTag(`${book.total_pages || book.pages} pages`, 'file-text');
-                }
-            }
-
-            document.getElementById('book-description').textContent = book.description || "No description provided for this study material.";
-            
-            // Image cover logic (flexible fields)
-            const coverImg = document.getElementById('book-cover');
-            const coverUrl = book.coverImage || book.cover_image || book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
-            coverImg.src = coverUrl;
-            coverImg.alt = `${title} Cover`;
-
-            updateMetaTags(title, book.description, coverUrl);
-
-            // Re-render Lucide
-            lucide.createIcons();
+            renderSharedContent('book', book);
         }
 
         function updateMetaTags(title, description, imageUrl) {
@@ -1374,31 +1589,34 @@
 
         window.openInApp = function() {
             if (!currentLoadedBook) return;
-            const bookId = currentLoadedBook.id || currentLoadedBook.slug;
-            // Use intent URL scheme or custom app scheme
-            const appUrl = `auralearning://book/${bookId}`;
+            const type = currentLoadedBook.__aura_type__ || 'book';
+            const idOrSlug = currentLoadedBook.id || currentLoadedBook.slug;
             
-            // Try opening the app
+            // App custom deep link scheme
+            const appUrl = `auralearning://${type}/${idOrSlug}`;
+            
+            // Navigate to deep link
             window.location.href = appUrl;
+            
+            console.log("[App Link] Deep link triggered:", appUrl);
         };
 
-        // Share Book functionality (Clipboard Copy)
+        // Share functionality (Clipboard Copy)
         window.shareBook = function() {
             if (!currentLoadedBook) return;
             
-            const bookSlug = currentLoadedBook.slug || currentLoadedBook.id;
-            const shareUrl = `${window.location.origin}${window.location.pathname}?book=${encodeURIComponent(bookSlug)}`;
+            const type = currentLoadedBook.__aura_type__ || 'book';
+            const slug = currentLoadedBook.slug || currentLoadedBook.id;
+            const shareUrl = `${window.location.origin}/${type}/${encodeURIComponent(slug)}`;
 
             navigator.clipboard.writeText(shareUrl).then(() => {
                 const btn = document.getElementById('btn-share-book');
-                const originalHtml = btn.innerHTML;
-
                 btn.innerHTML = `<i data-lucide="check" class="w-5 h-5 text-emerald-500"></i> Link Copied!`;
                 btn.classList.add('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-950/40', 'dark:text-emerald-400');
                 lucide.createIcons();
 
                 setTimeout(() => {
-                    btn.innerHTML = `<i data-lucide="share-2" class="w-5 h-5"></i> Share Book`;
+                    btn.innerHTML = `<i id="share-icon" data-lucide="share-2" class="w-4 h-4"></i> Share ${type.charAt(0).toUpperCase() + type.slice(1)}`;
                     btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'dark:bg-emerald-950/40', 'dark:text-emerald-400');
                     lucide.createIcons();
                 }, 2000);
@@ -1423,7 +1641,7 @@
                 const { data, error } = await supabaseClient
                     .from('books')
                     .select('*')
-                    .order('createdAt', { ascending: false }); // Note: updated from created_at to createdAt based on schema
+                    .order('createdAt', { ascending: false });
 
                 loadingEl.classList.add('hidden');
 
@@ -1437,13 +1655,11 @@
 
                 data.forEach(book => {
                     const title = book.bookName || book.name || book.title || "Untitled Book";
-                    const desc = book.description || "No description available.";
                     const coverUrl = book.coverImage || book.cover_image || book.cover_url || book.image_url || book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop';
                     
                     const dateStr = book.updated_at || book.createdAt || book.created_at;
                     let dateFormatted = 'Recently Added';
                     if (dateStr) {
-                         // Some unix timestamps are in ms (like 1783767379396)
                          const dateObj = new Date(typeof dateStr === 'number' ? dateStr : dateStr);
                          if (!isNaN(dateObj.getTime())) {
                              dateFormatted = dateObj.toLocaleDateString();
@@ -1458,8 +1674,15 @@
                     const classOrGrade = book.className || book.class || book.grade;
 
                     const card = document.createElement('a');
-                    card.href = `?book=${book.slug || book.id}`;
+                    // Use dynamic routing paths /book/:slug instead of query parameters
+                    card.href = `/book/${book.slug || book.id}`;
                     card.className = "group flex flex-col cursor-pointer";
+                    // Handle client SPA clicks gracefully
+                    card.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        window.history.pushState({}, '', `/book/${book.slug || book.id}`);
+                        handleClientRouting();
+                    });
                     
                     card.innerHTML = `
                         <div class="relative w-full aspect-[3/4] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-slate-200/50 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1">
@@ -1485,41 +1708,31 @@
 
         // Listen for back/forward navigation
         window.addEventListener('popstate', () => {
-            loadBookFromUrl();
+            handleClientRouting();
         });
 
         // Initialize and check online/offline events
         window.addEventListener('online', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('book')) {
-                loadBookFromUrl();
-            }
+            handleClientRouting();
         });
 
         window.addEventListener('offline', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('book')) {
-                showBookError(
-                    "You are currently offline", 
-                    "Please check your network connection and try again.", 
-                    "wifi-off", 
-                    true
-                );
-            }
+            showBookError(
+                "You are currently offline", 
+                "Please check your network connection and try again.", 
+                "wifi-off", 
+                true
+            );
         });
 
         // Expose functions globally for manual calls
         window.showNormalHomepage = showNormalHomepage;
         window.loadBookFromUrl = loadBookFromUrl;
         window.loadLibraryBooks = loadLibraryBooks;
+        window.handleClientRouting = handleClientRouting;
 
         // Auto execute on load
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('book')) {
-            loadBookFromUrl();
-        } else {
-            loadLibraryBooks();
-        }
+        handleClientRouting();
 
     </script>
 </body>

@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { google } from "googleapis";
@@ -139,6 +140,148 @@ app.post('/api/signup', async (req, res) => {
     res.status(500).json({ error: "Failed to process signup" });
   }
 });
+
+// Helper to determine index.html location depending on environment
+function getIndexHtmlPath(): string {
+  if (process.env.NODE_ENV === "production") {
+    return path.join(process.cwd(), 'dist', 'index.html');
+  } else {
+    return path.join(process.cwd(), 'index.html');
+  }
+}
+
+// Controller for handling dynamic path routes with server-side metadata and pre-injection
+async function handleDynamicRoute(req: any, res: any, type: string) {
+  const { slug } = req.params;
+  console.log(`[DynamicRoute] Server rendering ${type}/${slug}`);
+  
+  let data: any = null;
+  try {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    
+    if (type === 'book') {
+      if (uuidRegex.test(slug)) {
+        const { data: list } = await supabaseClient.from('books').select('*').eq('id', slug);
+        if (list && list.length > 0) data = list[0];
+      } else {
+        const { data: list } = await supabaseClient.from('books').select('*').eq('slug', slug);
+        if (list && list.length > 0) {
+          data = list[0];
+        } else {
+          const { data: listByName } = await supabaseClient.from('books').select('*').ilike('bookName', slug);
+          if (listByName && listByName.length > 0) data = listByName[0];
+        }
+      }
+    } else if (type === 'video') {
+      if (uuidRegex.test(slug)) {
+        const { data: list } = await supabaseClient.from('videos').select('*').eq('id', slug);
+        if (list && list.length > 0) data = list[0];
+      } else {
+        const { data: listByTitle } = await supabaseClient.from('videos').select('*').ilike('title', slug);
+        if (listByTitle && listByTitle.length > 0) {
+          data = listByTitle[0];
+        } else {
+          const { data: listByChapter } = await supabaseClient.from('videos').select('*').ilike('chapter', slug);
+          if (listByChapter && listByChapter.length > 0) data = listByChapter[0];
+        }
+      }
+    } else if (type === 'course') {
+      if (uuidRegex.test(slug)) {
+        const { data: list } = await supabaseClient.from('courses').select('*').eq('id', slug);
+        if (list && list.length > 0) data = list[0];
+      } else {
+        const { data: listByName } = await supabaseClient.from('courses').select('*').ilike('name', slug);
+        if (listByName && listByName.length > 0) data = listByName[0];
+      }
+    }
+  } catch (dbError) {
+    console.error(`[DynamicRoute] Supabase error fetching ${type}/${slug}:`, dbError);
+  }
+
+  // Redirect to home with a query parameter if content is not found
+  if (!data) {
+    console.log(`[DynamicRoute] Content not found for ${type}/${slug}, redirecting to homepage.`);
+    return res.redirect('/?content-not-found=true');
+  }
+
+  // Content found! Set up dynamic SEO tags
+  const title = data.title || data.bookName || data.name || "Untitled Resource";
+  const description = data.description || `Access this ${type} on the Aura Learning mobile app.`;
+  const defaultCover = 'https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png';
+  const coverUrl = data.thumbnail || data.coverImage || data.cover_image || data.cover_url || data.image_url || data.cover || defaultCover;
+  
+  const absoluteUrl = `https://aura.auralearning.workers.dev/${type}/${slug}`;
+
+  try {
+    const htmlPath = getIndexHtmlPath();
+    if (!fs.existsSync(htmlPath)) {
+      console.warn(`[DynamicRoute] index.html not found at ${htmlPath}`);
+      return res.redirect('/?content-not-found=true');
+    }
+
+    let html = fs.readFileSync(htmlPath, 'utf8');
+
+    // Substitute page title
+    html = html.replace(
+      /<title>Aura Learning – Learn Anytime, Anywhere<\/title>/,
+      `<title>${title} - Aura Learning</title>`
+    );
+
+    // Substitute canonical and og:url
+    html = html.replace(
+      /href="https:\/\/aura\.auralearning\.workers\.dev"/g,
+      `href="${absoluteUrl}"`
+    );
+    html = html.replace(
+      /content="https:\/\/aura\.auralearning\.workers\.dev"/g,
+      `content="${absoluteUrl}"`
+    );
+
+    // Substitute description
+    const shortDesc = description.length > 160 ? description.substring(0, 157) + '...' : description;
+    html = html.replace(
+      /content="Aura Learning is an educational platform offering books, notes, PDFs, videos, quizzes, and study materials\..*?"/g,
+      `content="${shortDesc.replace(/"/g, '&quot;')}"`
+    );
+
+    // Substitute og:title and twitter:title
+    html = html.replace(
+      /content="Aura Learning – Learn Anytime, Anywhere"/g,
+      `content="${title.replace(/"/g, '&quot;')}"`
+    );
+
+    // Substitute og:image and twitter:image
+    const defaultCoverEscaped = defaultCover.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    html = html.replace(
+      new RegExp(`content="${defaultCoverEscaped}"`, 'g'),
+      `content="${coverUrl}"`
+    );
+
+    // Inject Initial Data script for client-side hydration
+    const initialDataScript = `
+    <script>
+      window.__AURA_INITIAL_DATA__ = {
+        type: ${JSON.stringify(type)},
+        data: ${JSON.stringify(data)}
+      };
+    </script>
+    </head>`;
+
+    html = html.replace('</head>', initialDataScript);
+
+    res.header('Content-Type', 'text/html');
+    return res.status(200).send(html);
+  } catch (err) {
+    console.error("[DynamicRoute] Error rendering index HTML:", err);
+    return res.redirect('/?content-not-found=true');
+  }
+}
+
+// Android App Links Dynamic Content Routes
+app.get('/course/:slug', (req, res) => handleDynamicRoute(req, res, 'course'));
+app.get('/video/:slug', (req, res) => handleDynamicRoute(req, res, 'video'));
+app.get('/book/:slug', (req, res) => handleDynamicRoute(req, res, 'book'));
+app.get('/page/:slug', (req, res) => handleDynamicRoute(req, res, 'page'));
 
 // API Route: Dynamic sitemap.xml that automatically updates with new books/pages
 app.get('/sitemap.xml', async (req, res) => {
