@@ -283,30 +283,38 @@ app.get('/video/:slug', (req, res) => handleDynamicRoute(req, res, 'video'));
 app.get('/book/:slug', (req, res) => handleDynamicRoute(req, res, 'book'));
 app.get('/page/:slug', (req, res) => handleDynamicRoute(req, res, 'page'));
 
-// API Route: Dynamic sitemap.xml that automatically updates with new books/pages
+// API Route: Dynamic sitemap.xml that automatically updates with new books/videos/courses
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const host = req.get('host') || 'aura.auralearning.workers.dev';
-    const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-    const baseUrl = `${protocol}://${host}`;
+    const host = req.get('host') || '';
+    const baseUrl = (host.includes('localhost') || host.includes('127.0.0.1'))
+      ? `http://${host}`
+      : 'https://aura.auralearning.workers.dev';
 
-    // Query books from Supabase to automatically reflect new books in the sitemap
-    const { data: books } = await supabaseClient
-      .from('books')
-      .select('id, slug');
+    // Fetch dynamic content from Supabase, selecting only 'id' since the tables do not have 'slug' columns
+    const { data: books } = await supabaseClient.from('books').select('id');
+    const { data: videos } = await supabaseClient.from('videos').select('id');
+    const { data: courses } = await supabaseClient.from('courses').select('id');
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
     
-    // Homepage (priority 1.0, weekly change frequency)
+    // 1. Homepage (priority 1.0, weekly change frequency)
     xml += `  <url>\n`;
     xml += `    <loc>${baseUrl}/</loc>\n`;
     xml += `    <changefreq>weekly</changefreq>\n`;
     xml += `    <priority>1.0</priority>\n`;
     xml += `  </url>\n`;
 
-    // Static public pages (priority 0.8, monthly change frequency)
-    const otherPages = ['/about', '/contact', '/privacy', '/terms', '/updates.html', '/admin.html'];
+    // 2. Static and general pages (priority 0.8, monthly change frequency)
+    const otherPages = [
+      '/updates.html',
+      '/admin.html',
+      '/about',
+      '/contact',
+      '/privacy',
+      '/terms'
+    ];
     for (const page of otherPages) {
       xml += `  <url>\n`;
       xml += `    <loc>${baseUrl}${page}</loc>\n`;
@@ -315,13 +323,38 @@ app.get('/sitemap.xml', async (req, res) => {
       xml += `  </url>\n`;
     }
 
-    // Dynamic book pages
+    // 3. Dynamic book pages
     if (books && books.length > 0) {
       for (const book of books) {
-        const bookSlug = book.slug || book.id;
-        if (bookSlug) {
+        if (book.id) {
           xml += `  <url>\n`;
-          xml += `    <loc>${baseUrl}/?book=${encodeURIComponent(bookSlug)}</loc>\n`;
+          xml += `    <loc>${baseUrl}/book/${encodeURIComponent(book.id)}</loc>\n`;
+          xml += `    <changefreq>monthly</changefreq>\n`;
+          xml += `    <priority>0.8</priority>\n`;
+          xml += `  </url>\n`;
+        }
+      }
+    }
+
+    // 4. Dynamic video pages
+    if (videos && videos.length > 0) {
+      for (const video of videos) {
+        if (video.id) {
+          xml += `  <url>\n`;
+          xml += `    <loc>${baseUrl}/video/${encodeURIComponent(video.id)}</loc>\n`;
+          xml += `    <changefreq>monthly</changefreq>\n`;
+          xml += `    <priority>0.8</priority>\n`;
+          xml += `  </url>\n`;
+        }
+      }
+    }
+
+    // 5. Dynamic course pages
+    if (courses && courses.length > 0) {
+      for (const course of courses) {
+        if (course.id) {
+          xml += `  <url>\n`;
+          xml += `    <loc>${baseUrl}/course/${encodeURIComponent(course.id)}</loc>\n`;
           xml += `    <changefreq>monthly</changefreq>\n`;
           xml += `    <priority>0.8</priority>\n`;
           xml += `  </url>\n`;
