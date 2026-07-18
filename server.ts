@@ -193,6 +193,15 @@ async function handleDynamicRoute(req: any, res: any, type: string) {
         const { data: listByName } = await supabaseClient.from('courses').select('*').ilike('name', slug);
         if (listByName && listByName.length > 0) data = listByName[0];
       }
+    } else if (type === 'announcement' || type === 'upload' || type === 'post') {
+      // Both announcements and uploads come from updates_amusement table
+      if (uuidRegex.test(slug)) {
+        const { data: list } = await supabaseClient.from('updates_amusement').select('*').eq('id', slug);
+        if (list && list.length > 0) data = list[0];
+      } else {
+        const { data: listByTitle } = await supabaseClient.from('updates_amusement').select('*').ilike('title', slug);
+        if (listByTitle && listByTitle.length > 0) data = listByTitle[0];
+      }
     }
   } catch (dbError) {
     console.error(`[DynamicRoute] Supabase error fetching ${type}/${slug}:`, dbError);
@@ -282,6 +291,14 @@ app.get('/course/:slug', (req, res) => handleDynamicRoute(req, res, 'course'));
 app.get('/video/:slug', (req, res) => handleDynamicRoute(req, res, 'video'));
 app.get('/book/:slug', (req, res) => handleDynamicRoute(req, res, 'book'));
 app.get('/page/:slug', (req, res) => handleDynamicRoute(req, res, 'page'));
+app.get('/announcement/:slug', (req, res) => handleDynamicRoute(req, res, 'announcement'));
+app.get('/upload/:slug', (req, res) => handleDynamicRoute(req, res, 'upload'));
+
+// Route for /robot (as requested by user)
+app.get('/robot', (req, res) => {
+  res.header('Content-Type', 'text/plain');
+  res.send('User-agent: *\nAllow: /\nSitemap: https://aura.auralearning.workers.dev/sitemap.xml');
+});
 
 // API Route: Dynamic sitemap.xml that automatically updates with new books/videos/courses
 app.get('/sitemap.xml', async (req, res) => {
@@ -291,75 +308,39 @@ app.get('/sitemap.xml', async (req, res) => {
       ? `http://${host}`
       : 'https://aura.auralearning.workers.dev';
 
-    // Fetch dynamic content from Supabase, selecting only 'id' since the tables do not have 'slug' columns
+    // Fetch dynamic content from Supabase
     const { data: books } = await supabaseClient.from('books').select('id');
     const { data: videos } = await supabaseClient.from('videos').select('id');
     const { data: courses } = await supabaseClient.from('courses').select('id');
+    const { data: posts } = await supabaseClient.from('updates_amusement').select('id, title');
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
     
-    // 1. Homepage (priority 1.0, weekly change frequency)
-    xml += `  <url>\n`;
-    xml += `    <loc>${baseUrl}/</loc>\n`;
-    xml += `    <changefreq>weekly</changefreq>\n`;
-    xml += `    <priority>1.0</priority>\n`;
-    xml += `  </url>\n`;
+    // 1. Homepage
+    xml += `  <url><loc>${baseUrl}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n`;
 
-    // 2. Static and general pages (priority 0.8, monthly change frequency)
-    const otherPages = [
-      '/updates.html',
-      '/admin.html',
-      '/about',
-      '/contact',
-      '/privacy',
-      '/terms'
-    ];
-    for (const page of otherPages) {
-      xml += `  <url>\n`;
-      xml += `    <loc>${baseUrl}${page}</loc>\n`;
-      xml += `    <changefreq>monthly</changefreq>\n`;
-      xml += `    <priority>0.8</priority>\n`;
-      xml += `  </url>\n`;
+    // 2. Sections
+    const sections = ['#updates', '#announcements', '#library-section'];
+    for (const section of sections) {
+      xml += `  <url><loc>${baseUrl}/${section}</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>\n`;
     }
 
     // 3. Dynamic book pages
-    if (books && books.length > 0) {
-      for (const book of books) {
-        if (book.id) {
-          xml += `  <url>\n`;
-          xml += `    <loc>${baseUrl}/book/${encodeURIComponent(book.id)}</loc>\n`;
-          xml += `    <changefreq>monthly</changefreq>\n`;
-          xml += `    <priority>0.8</priority>\n`;
-          xml += `  </url>\n`;
-        }
-      }
-    }
-
+    if (books) books.forEach(b => xml += `  <url><loc>${baseUrl}/book/${b.id}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`);
+    
     // 4. Dynamic video pages
-    if (videos && videos.length > 0) {
-      for (const video of videos) {
-        if (video.id) {
-          xml += `  <url>\n`;
-          xml += `    <loc>${baseUrl}/video/${encodeURIComponent(video.id)}</loc>\n`;
-          xml += `    <changefreq>monthly</changefreq>\n`;
-          xml += `    <priority>0.8</priority>\n`;
-          xml += `  </url>\n`;
-        }
-      }
-    }
+    if (videos) videos.forEach(v => xml += `  <url><loc>${baseUrl}/video/${v.id}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`);
 
     // 5. Dynamic course pages
-    if (courses && courses.length > 0) {
-      for (const course of courses) {
-        if (course.id) {
-          xml += `  <url>\n`;
-          xml += `    <loc>${baseUrl}/course/${encodeURIComponent(course.id)}</loc>\n`;
-          xml += `    <changefreq>monthly</changefreq>\n`;
-          xml += `    <priority>0.8</priority>\n`;
-          xml += `  </url>\n`;
-        }
-      }
+    if (courses) courses.forEach(c => xml += `  <url><loc>${baseUrl}/course/${c.id}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`);
+
+    // 6. Dynamic announcements and uploads
+    if (posts) {
+      posts.forEach(p => {
+        const type = p.title && p.title.startsWith('[Announcement] ') ? 'announcement' : 'upload';
+        xml += `  <url><loc>${baseUrl}/${type}/${p.id}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
+      });
     }
 
     xml += `</urlset>`;
