@@ -747,10 +747,10 @@
                     <h4 class="text-white font-semibold mb-6 uppercase tracking-wider text-sm">Legal</h4>
                     <ul class="space-y-3 text-slate-400">
                         <li>
-                            <button onclick="openModal('privacy-modal')" class="hover:text-white transition-colors text-left">Privacy Policy</button>
+                            <a href="/privacy-policy" onclick="event.preventDefault(); openModal('privacy-modal');" class="hover:text-white transition-colors text-left block w-full">Privacy Policy</a>
                         </li>
                         <li>
-                            <button onclick="openModal('terms-modal')" class="hover:text-white transition-colors text-left">Terms of Use</button>
+                            <a href="/terms-of-use" onclick="event.preventDefault(); openModal('terms-modal');" class="hover:text-white transition-colors text-left block w-full">Terms of Use</a>
                         </li>
                     </ul>
                 </div>
@@ -1032,14 +1032,30 @@
         }
 
         // Modals
-        function openModal(id) {
-            document.getElementById(id).classList.add('open');
+        function openModal(id, updateUrl = true) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            
+            el.classList.add('open');
             document.body.style.overflow = 'hidden';
+            
+            if (updateUrl) {
+                if (id === 'privacy-modal') window.history.pushState({ modalId: id }, '', '/privacy-policy');
+                else if (id === 'terms-modal') window.history.pushState({ modalId: id }, '', '/terms-of-use');
+            }
         }
 
         function closeModal(id) {
-            document.getElementById(id).classList.remove('open');
+            const el = document.getElementById(id);
+            if (!el) return;
+            
+            el.classList.remove('open');
             document.body.style.overflow = '';
+            
+            // If we are on a modal URL, go back to home
+            if (window.location.pathname === '/privacy-policy' || window.location.pathname === '/terms-of-use') {
+                window.history.pushState({}, '', '/');
+            }
         }
 
         // Close modals when clicking outside
@@ -1347,8 +1363,13 @@
             // Close all potential overlays/modals
             const feedPostModal = document.getElementById('feed-post-modal');
             const feedOverlay = document.getElementById('feed-overlay');
+            const privacyModal = document.getElementById('privacy-modal');
+            const termsModal = document.getElementById('terms-modal');
+
             if (feedPostModal && feedPostModal.classList.contains('open')) closeFeedPostModal();
             if (feedOverlay && feedOverlay.classList.contains('open')) closeFeedOverlay();
+            if (privacyModal && privacyModal.classList.contains('open')) closeModal('privacy-modal');
+            if (termsModal && termsModal.classList.contains('open')) closeModal('terms-modal');
 
             document.getElementById('homepage-content').classList.remove('hidden');
             document.getElementById('book-content').classList.add('hidden');
@@ -1556,6 +1577,8 @@
             const pageMatch = path.match(/^\/page\/([^/]+)/);
             const announcementMatch = path.match(/^\/announcement\/([^/]+)/);
             const uploadMatch = path.match(/^\/upload\/([^/]+)/);
+            const privacyMatch = path.match(/^\/privacy-policy/);
+            const termsMatch = path.match(/^\/terms-of-use/);
             const hash = window.location.hash;
 
             if (courseMatch) {
@@ -1570,6 +1593,10 @@
                 loadFeedPostFromSlug('announcement', announcementMatch[1]);
             } else if (uploadMatch) {
                 loadFeedPostFromSlug('upload', uploadMatch[1]);
+            } else if (privacyMatch) {
+                openModal('privacy-modal', false);
+            } else if (termsMatch) {
+                openModal('terms-modal', false);
             } else if (hash === '#updates' || hash === '#announcements') {
                 openFeedOverlay(hash === '#announcements' ? 'announcements' : 'updates');
             } else {

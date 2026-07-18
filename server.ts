@@ -151,8 +151,8 @@ function getIndexHtmlPath(): string {
 }
 
 // Controller for handling dynamic path routes with server-side metadata and pre-injection
-async function handleDynamicRoute(req: any, res: any, type: string) {
-  const { slug } = req.params;
+async function handleDynamicRoute(req: any, res: any, type: string, slugOverride?: string) {
+  const slug = slugOverride || req.params.slug;
   console.log(`[DynamicRoute] Server rendering ${type}/${slug}`);
   
   let data: any = null;
@@ -201,6 +201,12 @@ async function handleDynamicRoute(req: any, res: any, type: string) {
       } else {
         const { data: listByTitle } = await supabaseClient.from('updates_amusement').select('*').ilike('title', slug);
         if (listByTitle && listByTitle.length > 0) data = listByTitle[0];
+      }
+    } else if (type === 'page') {
+      if (slug === 'privacy-policy') {
+        data = { title: 'Privacy Policy', description: 'Review our privacy practices and how we protect your data.' };
+      } else if (slug === 'terms-of-use') {
+        data = { title: 'Terms of Use', description: 'Read our terms of service for using Aura Learning.' };
       }
     }
   } catch (dbError) {
@@ -293,6 +299,8 @@ app.get('/book/:slug', (req, res) => handleDynamicRoute(req, res, 'book'));
 app.get('/page/:slug', (req, res) => handleDynamicRoute(req, res, 'page'));
 app.get('/announcement/:slug', (req, res) => handleDynamicRoute(req, res, 'announcement'));
 app.get('/upload/:slug', (req, res) => handleDynamicRoute(req, res, 'upload'));
+app.get('/privacy-policy', (req, res) => handleDynamicRoute(req, res, 'page', 'privacy-policy'));
+app.get('/terms-of-use', (req, res) => handleDynamicRoute(req, res, 'page', 'terms-of-use'));
 
 // Route for /robot (as requested by user)
 app.get('/robot', (req, res) => {
@@ -321,9 +329,10 @@ app.get('/sitemap.xml', async (req, res) => {
     xml += `  <url><loc>${baseUrl}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n`;
 
     // 2. Sections
-    const sections = ['#updates', '#announcements', '#library-section'];
+    const sections = ['#updates', '#announcements', '#library-section', 'privacy-policy', 'terms-of-use'];
     for (const section of sections) {
-      xml += `  <url><loc>${baseUrl}/${section}</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>\n`;
+      const isPage = section.startsWith('privacy') || section.startsWith('terms');
+      xml += `  <url><loc>${baseUrl}/${section}</loc><changefreq>${isPage ? 'monthly' : 'weekly'}</changefreq><priority>${isPage ? '0.5' : '0.9'}</priority></url>\n`;
     }
 
     // 3. Dynamic book pages
