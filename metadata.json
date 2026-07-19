@@ -1,6 +1,6 @@
 {
-  "name": "Aura Pre-Registration",
-  "description": "Aura Learning App with library books grid, APKPure download button, Gemini chatbot, and Gmail automated emails.",
+  "name": "Aura Learning",
+  "description": "Minimalist, distraction-free learning platform with user authentication, library system, and AI-powered chatbot.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

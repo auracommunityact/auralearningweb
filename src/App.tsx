@@ -20,7 +20,7 @@ export default function App() {
   
   // Auth Modal & Interception State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup' | 'updatePassword'>('login');
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   const isAdmin = user?.email === 'auracommunityact@gmail.com';
@@ -30,9 +30,14 @@ export default function App() {
       setUser(session?.user ?? null);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
+      
+      if (event === 'PASSWORD_RECOVERY') {
+        setAuthModalMode('updatePassword');
+        setIsAuthModalOpen(true);
+      }
       
       // Execute pending action if they just logged in
       if (currentUser && pendingAction) {

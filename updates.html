@@ -276,14 +276,14 @@
         <!-- Social Media Channels Section -->
         <div class="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10">
             <h5 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 text-center">Follow Our Journey</h5>
-            <div class="flex justify-center items-center gap-8">
-                <a href="https://youtube.com/@auralearningofficialy?si=anKX8ID1oPFd6MHi" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-1.5 text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-500 transition-colors" aria-label="YouTube">
-                    <i data-lucide="youtube" class="w-6 h-6"></i>
-                    <span class="text-[10px] font-semibold uppercase tracking-wider">YouTube</span>
+            <div class="flex flex-col gap-4 max-w-[160px] mx-auto">
+                <a href="https://youtube.com/@auralearningofficialy?si=anKX8ID1oPFd6MHi" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 text-slate-600 hover:text-[#FF0000] dark:text-slate-400 dark:hover:text-[#FF0000] transition-colors group" aria-label="YouTube">
+                    <i data-lucide="youtube" class="w-7 h-7 text-[#FF0000] transition-transform group-hover:scale-110"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider">YouTube</span>
                 </a>
-                <a href="https://www.instagram.com/auralearningofficialy?igsh=NmJ0Mm83OXo2NjMx" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-1.5 text-slate-500 hover:text-pink-600 dark:text-slate-400 dark:hover:text-pink-500 transition-colors" aria-label="Instagram">
-                    <i data-lucide="instagram" class="w-6 h-6"></i>
-                    <span class="text-[10px] font-semibold uppercase tracking-wider">Instagram</span>
+                <a href="https://www.instagram.com/auralearningofficialy?igsh=NmJ0Mm83OXo2NjMx" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 text-slate-600 hover:text-[#E1306C] dark:text-slate-400 dark:hover:text-[#E1306C] transition-colors group" aria-label="Instagram">
+                    <i data-lucide="instagram" class="w-7 h-7 text-[#E1306C] transition-transform group-hover:scale-110"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider">Instagram</span>
                 </a>
             </div>
         </div>
@@ -353,11 +353,11 @@
                         Transforming the education journey with personalized, privacy-first mobile learning solutions.
                     </p>
                     <div class="flex items-center gap-4">
-                        <a href="https://youtube.com/@auralearningofficialy?si=anKX8ID1oPFd6MHi" target="_blank" rel="noopener noreferrer" class="p-2.5 bg-slate-800 hover:bg-red-600 hover:text-white text-slate-400 rounded-full transition-all duration-300 flex items-center justify-center" aria-label="YouTube Channel">
-                            <i data-lucide="youtube" class="w-5 h-5"></i>
+                        <a href="https://youtube.com/@auralearningofficialy?si=anKX8ID1oPFd6MHi" target="_blank" rel="noopener noreferrer" class="p-2 bg-slate-800 hover:bg-[#FF0000] text-[#FF0000] hover:text-white rounded-full transition-all duration-300 flex items-center justify-center group" aria-label="YouTube Channel">
+                            <i data-lucide="youtube" class="w-6 h-6"></i>
                         </a>
-                        <a href="https://www.instagram.com/auralearningofficialy?igsh=NmJ0Mm83OXo2NjMx" target="_blank" rel="noopener noreferrer" class="p-2.5 bg-slate-800 hover:bg-pink-600 hover:text-white text-slate-400 rounded-full transition-all duration-300 flex items-center justify-center" aria-label="Instagram Profile">
-                            <i data-lucide="instagram" class="w-5 h-5"></i>
+                        <a href="https://www.instagram.com/auralearningofficialy?igsh=NmJ0Mm83OXo2NjMx" target="_blank" rel="noopener noreferrer" class="p-2 bg-slate-800 hover:bg-[#E1306C] text-[#E1306C] hover:text-white rounded-full transition-all duration-300 flex items-center justify-center group" aria-label="Instagram Profile">
+                            <i data-lucide="instagram" class="w-6 h-6"></i>
                         </a>
                     </div>
                 </div>
@@ -516,6 +516,9 @@
             sidebar.classList.add('open');
             sidebarOverlay.classList.add('open');
             document.body.style.overflow = 'hidden';
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         }
 
         function closeSidebar() {

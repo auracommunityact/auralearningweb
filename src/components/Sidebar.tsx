@@ -140,26 +140,26 @@ export function Sidebar({ isOpen, onClose, user, isAdmin, onSignOut, onShowToast
               {/* Social Channels */}
               <div className="space-y-4 mt-auto pt-6 border-t border-slate-100">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Follow Our Journey</h3>
-                <div className="flex justify-center items-center gap-8">
+                <div className="flex flex-col gap-4 max-w-[160px] mx-auto">
                   <a
                     href="https://youtube.com/@auralearningofficialy?si=anKX8ID1oPFd6MHi"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-1.5 text-slate-500 hover:text-red-600 transition-colors"
+                    className="flex items-center gap-3 text-slate-600 hover:text-[#FF0000] transition-colors group"
                     aria-label="YouTube"
                   >
-                    <Youtube size={24} />
-                    <span className="text-[10px] font-semibold uppercase tracking-wider">YouTube</span>
+                    <Youtube size={28} color="#FF0000" className="transition-transform group-hover:scale-110" />
+                    <span className="text-xs font-bold uppercase tracking-wider">YouTube</span>
                   </a>
                   <a
                     href="https://www.instagram.com/auralearningofficialy?igsh=NmJ0Mm83OXo2NjMx"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-1.5 text-slate-500 hover:text-pink-600 transition-colors"
+                    className="flex items-center gap-3 text-slate-600 hover:text-[#E1306C] transition-colors group"
                     aria-label="Instagram"
                   >
-                    <Instagram size={24} />
-                    <span className="text-[10px] font-semibold uppercase tracking-wider">Instagram</span>
+                    <Instagram size={28} color="#E1306C" className="transition-transform group-hover:scale-110" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Instagram</span>
                   </a>
                 </div>
               </div>
