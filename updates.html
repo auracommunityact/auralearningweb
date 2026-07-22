@@ -124,6 +124,36 @@
                     <button id="theme-toggle" class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none" aria-label="Toggle dark mode">
                         <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
                     </button>
+                    
+                    <!-- Header Authentication Views -->
+                    <div id="header-logged-out-view" class="flex items-center gap-1.5 sm:gap-3">
+                        <button onclick="openAuthModal('login')" class="px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 cursor-pointer focus:outline-none">Log In</button>
+                        <button onclick="openAuthModal('signup')" class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-all duration-300 cursor-pointer focus:outline-none">Sign Up</button>
+                    </div>
+                    
+                    <div id="header-logged-in-view" class="relative hidden">
+                        <button id="header-profile-btn" onclick="toggleProfileDropdown(event)" class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold border border-slate-200/50 dark:border-slate-800 flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-indigo-500 transition-all focus:outline-none" aria-label="User profile">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </button>
+                        <!-- Profile Dropdown Menu -->
+                        <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 hidden opacity-0 scale-95 transition-all duration-200 origin-top-right">
+                            <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+                                <p class="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider font-semibold">Logged in as</p>
+                                <p id="header-user-email" class="text-xs font-medium text-slate-900 dark:text-white truncate mt-0.5"></p>
+                            </div>
+                            <button onclick="openProfileModal()" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2 transition-colors cursor-pointer focus:outline-none">
+                                <i data-lucide="user" class="w-4 h-4 text-indigo-500"></i> Profile
+                            </button>
+                            <button onclick="openSettingsModal()" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2 transition-colors cursor-pointer focus:outline-none">
+                                <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i> Settings
+                            </button>
+                            <hr class="border-slate-100 dark:border-slate-800 my-1">
+                            <button id="btn-logout" class="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2 transition-colors cursor-pointer font-medium focus:outline-none">
+                                <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+
                     <button id="mobile-menu-btn" class="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none" aria-label="Open menu">
                         <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
@@ -144,104 +174,13 @@
             </button>
         </div>
         
-        <div class="p-6 flex-1 overflow-y-auto flex flex-col">
-            <!-- Logged In View -->
-            <div id="auth-logged-in" class="hidden flex-col h-full">
-                <div class="flex items-center gap-4 mb-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                    <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xl shrink-0">
-                        <i data-lucide="user" class="w-6 h-6"></i>
-                    </div>
-                    <div class="overflow-hidden">
-                        <h4 class="font-semibold text-slate-900 dark:text-white truncate">Welcome back</h4>
-                        <p id="user-email-display" class="text-sm text-slate-500 dark:text-slate-400 truncate">user@example.com</p>
-                    </div>
-                </div>
-
-                <div class="mb-8 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
-                    <h5 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">Your Referral Code</h5>
-                    <div class="flex items-center justify-between bg-white dark:bg-slate-950 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800">
-                        <span id="user-referral-code" class="font-mono font-bold text-slate-900 dark:text-white tracking-widest text-lg">---</span>
-                        <button onclick="copyReferralCode()" class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors focus:outline-none" aria-label="Copy referral code">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                    <div id="referred-badge" class="mt-3 hidden items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1.5 rounded-lg w-fit border border-emerald-100 dark:border-emerald-800/30">
-                        <i data-lucide="award" class="w-4 h-4"></i>
-                        Bonus Access Unlocked
-                    </div>
-                </div>
-                
-                <div class="mt-auto">
-                    <button id="btn-logout" class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
-                        <i data-lucide="log-out" class="w-5 h-5"></i> Log Out
-                    </button>
-                </div>
+        <div class="p-6 flex-1 overflow-y-auto flex flex-col justify-center items-center text-center space-y-4">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-inner">
+                <i data-lucide="sparkles" class="w-8 h-8"></i>
             </div>
-
-            <!-- Logged Out View -->
-            <div id="auth-logged-out" class="flex flex-col h-full">
-                <!-- Auth Message Container -->
-                <div id="auth-message" class="hidden mb-4 p-3 rounded-xl text-sm font-medium"></div>
-
-                <!-- Login Form -->
-                <form id="login-form" class="space-y-4 flex flex-col flex-1">
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Log In</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Welcome back to Aura Learning</p>
-                    </div>
-                    
-                    <div class="space-y-4 flex-1">
-                        <div>
-                            <label for="login-email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-                            <input type="email" id="login-email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="you@example.com">
-                        </div>
-                        <div>
-                            <label for="login-password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
-                            <input type="password" id="login-password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="••••••••">
-                        </div>
-                    </div>
-
-                    <button type="submit" id="btn-login-submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2">
-                        <span id="login-text">Log In</span>
-                        <i data-lucide="loader-2" id="login-spinner" class="w-5 h-5 animate-spin hidden"></i>
-                    </button>
-                    
-                    <div class="text-center mt-4">
-                        <button type="button" onclick="toggleAuthMode('signup')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Don't have an account? Sign Up</button>
-                    </div>
-                </form>
-
-                <!-- Signup Form -->
-                <form id="signup-form" class="hidden space-y-4 flex flex-col flex-1">
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Sign Up</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Create your Aura Learning account</p>
-                    </div>
-
-                    <div class="space-y-4 flex-1">
-                        <div>
-                            <label for="signup-email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-                            <input type="email" id="signup-email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="you@example.com">
-                        </div>
-                        <div>
-                            <label for="signup-password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
-                            <input type="password" id="signup-password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="••••••••">
-                        </div>
-                        <div>
-                            <label for="signup-referral" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Referral Code (Optional)</label>
-                            <input type="text" id="signup-referral" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all uppercase" placeholder="e.g. AURA123">
-                        </div>
-                    </div>
-
-                    <button type="submit" id="btn-signup-submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2">
-                        <span id="signup-text">Sign Up</span>
-                        <i data-lucide="loader-2" id="signup-spinner" class="w-5 h-5 animate-spin hidden"></i>
-                    </button>
-
-                    <div class="text-center mt-4">
-                        <button type="button" onclick="toggleAuthMode('login')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Already have an account? Log In</button>
-                    </div>
-                </form>
+            <div>
+                <h4 class="font-bold text-slate-900 dark:text-white tracking-tight">Aura Learning</h4>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-[200px] leading-relaxed">Find your calm and focus in every study session.</p>
             </div>
         </div>
         
@@ -342,24 +281,16 @@
     <!-- Footer Section -->
     <footer class="bg-slate-900 dark:bg-slate-950 text-slate-300 py-12 lg:py-16 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
                 <!-- Section 1 -->
                 <div>
                     <div class="flex items-center gap-3 mb-6">
                         <img src="https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png" alt="Aura Learning Logo" class="h-8 w-auto object-contain">
                         <span class="font-bold text-xl text-white tracking-tight">Aura Learning</span>
                     </div>
-                    <p class="text-slate-400 text-sm max-w-sm mb-6">
+                    <p class="text-slate-400 text-sm max-w-sm">
                         Transforming the education journey with personalized, privacy-first mobile learning solutions.
                     </p>
-                    <div class="flex items-center gap-4">
-                        <a href="https://youtube.com/@auralearningofficialy?si=anKX8ID1oPFd6MHi" target="_blank" rel="noopener noreferrer" class="p-2 bg-slate-800 hover:bg-[#FF0000] text-[#FF0000] hover:text-white rounded-full transition-all duration-300 flex items-center justify-center group" aria-label="YouTube Channel">
-                            <i data-lucide="youtube" class="w-6 h-6"></i>
-                        </a>
-                        <a href="https://www.instagram.com/auralearningofficialy?igsh=NmJ0Mm83OXo2NjMx" target="_blank" rel="noopener noreferrer" class="p-2 bg-slate-800 hover:bg-[#E1306C] text-[#E1306C] hover:text-white rounded-full transition-all duration-300 flex items-center justify-center group" aria-label="Instagram Profile">
-                            <i data-lucide="instagram" class="w-6 h-6"></i>
-                        </a>
-                    </div>
                 </div>
                 
                 <!-- Section 2 -->
@@ -370,7 +301,46 @@
                     </div>
                 </div>
 
-                <!-- Section 3 -->
+                <!-- Section 3: Follow Aura Learning -->
+                <div>
+                    <h4 class="text-white font-semibold mb-6 uppercase tracking-wider text-sm">Follow Aura Learning</h4>
+                    <ul class="space-y-4 text-slate-400">
+                        <li>
+                            <a href="https://youtube.com/@auralearningofficialy" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 hover:text-white transition-all duration-300 group">
+                                <span class="p-2 bg-slate-800/80 rounded-xl text-[#FF0000] group-hover:bg-[#FF0000] group-hover:text-white transition-all duration-300 flex items-center justify-center">
+                                    <i data-lucide="youtube" class="w-5 h-5"></i>
+                                </span>
+                                <span class="font-medium text-sm">YouTube</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.instagram.com/auralearningofficialy" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 hover:text-white transition-all duration-300 group">
+                                <span class="p-2 bg-slate-800/80 rounded-xl text-[#E1306C] group-hover:bg-[#E1306C] group-hover:text-white transition-all duration-300 flex items-center justify-center">
+                                    <i data-lucide="instagram" class="w-5 h-5"></i>
+                                </span>
+                                <span class="font-medium text-sm">Instagram</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://x.com/auralearninge" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 hover:text-white transition-all duration-300 group">
+                                <span class="p-2 bg-slate-800/80 rounded-xl text-[#1DA1F2] group-hover:bg-[#1DA1F2] group-hover:text-white transition-all duration-300 flex items-center justify-center">
+                                    <i data-lucide="twitter" class="w-5 h-5"></i>
+                                </span>
+                                <span class="font-medium text-sm">X (Twitter)</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.snapchat.com/add/auralearning" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 hover:text-white transition-all duration-300 group">
+                                <span class="p-2 bg-slate-800/80 rounded-xl text-[#FFFC00] group-hover:bg-[#FFFC00] group-hover:text-black transition-all duration-300 flex items-center justify-center">
+                                    <i data-lucide="snapchat" class="w-5 h-5"></i>
+                                </span>
+                                <span class="font-medium text-sm">Snapchat</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Section 4 -->
                 <div>
                     <h4 class="text-white font-semibold mb-6 uppercase tracking-wider text-sm">Legal</h4>
                     <ul class="space-y-3 text-slate-400">
@@ -475,14 +445,188 @@
         </div>
     </div>
 
+    <!-- Authentication Modal (Login / Signup) -->
+    <div id="auth-modal" class="modal fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md flex flex-col transition-colors duration-300" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-3xl transition-colors duration-300">
+                <h3 id="auth-modal-title" class="text-xl font-bold text-slate-900 dark:text-white">Authentication</h3>
+                <button onclick="closeModal('auth-modal')" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 flex flex-col">
+                <!-- Auth Message Container -->
+                <div id="auth-message" class="hidden mb-4 p-3 rounded-xl text-sm font-medium"></div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-4 flex flex-col">
+                    <div>
+                        <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-1">Welcome Back</h4>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Log in to access your dashboard</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                            <input type="email" id="login-email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                            <input type="password" id="login-password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-login-submit" class="w-full py-3 px-4 mt-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2 cursor-pointer focus:outline-none">
+                        <span id="login-text">Log In</span>
+                        <i data-lucide="loader-2" id="login-spinner" class="w-5 h-5 animate-spin hidden"></i>
+                    </button>
+                    
+                    <div class="text-center mt-4">
+                        <button type="button" onclick="toggleAuthMode('signup')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium cursor-pointer focus:outline-none">Don't have an account? Sign Up</button>
+                    </div>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signup-form" class="hidden space-y-4 flex flex-col">
+                    <div>
+                        <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-1">Create Account</h4>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Start your learning journey with us</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="signup-email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                            <input type="email" id="signup-email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label for="signup-password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                            <input type="password" id="signup-password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="••••••••">
+                        </div>
+                        <div>
+                            <label for="signup-referral" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Referral Code (Optional)</label>
+                            <input type="text" id="signup-referral" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all uppercase" placeholder="e.g. AURA123">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-signup-submit" class="w-full py-3 px-4 mt-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2 cursor-pointer focus:outline-none">
+                        <span id="signup-text">Sign Up</span>
+                        <i data-lucide="loader-2" id="signup-spinner" class="w-5 h-5 animate-spin hidden"></i>
+                    </button>
+
+                    <div class="text-center mt-4">
+                        <button type="button" onclick="toggleAuthMode('login')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium cursor-pointer focus:outline-none">Already have an account? Log In</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md flex flex-col transition-colors duration-300" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-3xl transition-colors duration-300">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Your Profile</h3>
+                <button onclick="closeModal('profile-modal')" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6">
+                <!-- Logged In View -->
+                <div id="auth-logged-in" class="flex flex-col space-y-6">
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 transition-colors duration-300">
+                        <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xl shrink-0">
+                            <i data-lucide="user" class="w-6 h-6"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h4 class="font-semibold text-slate-900 dark:text-white truncate">Welcome back</h4>
+                            <p id="user-email-display" class="text-sm text-slate-500 dark:text-slate-400 truncate">user@example.com</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/30 transition-colors duration-300">
+                        <h5 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">Your Referral Code</h5>
+                        <div class="flex items-center justify-between bg-white dark:bg-slate-950 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors duration-300">
+                            <span id="user-referral-code" class="font-mono font-bold text-slate-900 dark:text-white tracking-widest text-lg">---</span>
+                            <button onclick="copyReferralCode()" class="copy-referral-btn text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors focus:outline-none" aria-label="Copy referral code">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div id="referred-badge" class="mt-3 hidden items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1.5 rounded-lg w-fit border border-emerald-100 dark:border-emerald-800/30">
+                            <i data-lucide="award" class="w-4 h-4"></i>
+                            Bonus Access Unlocked
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md flex flex-col transition-colors duration-300" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-3xl transition-colors duration-300">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Settings</h3>
+                <button onclick="closeModal('settings-modal')" class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6">
+                <!-- Theme Preference -->
+                <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 transition-colors duration-300">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl text-indigo-600 dark:text-indigo-400">
+                            <i data-lucide="moon" class="w-5 h-5"></i>
+                        </span>
+                        <div>
+                            <h4 class="font-semibold text-slate-900 dark:text-white text-sm">Dark Mode</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Switch between light and dark themes</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all duration-300 focus:outline-none" aria-label="Toggle theme">
+                        <i id="theme-icon-settings" data-lucide="moon" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                
+                <!-- App Info -->
+                <div class="p-4 bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-center transition-colors duration-300">
+                    <p class="text-xs text-slate-400">Aura Learning App v1.0.0</p>
+                    <p class="text-xs text-slate-400 mt-1">Made with ❤️ for distraction-free learning</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script>
+        // Global Theme Toggle Function
+        window.toggleTheme = function() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+                const themeIcon = document.getElementById('theme-icon');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
+                const settingsThemeIcon = document.getElementById('theme-icon-settings');
+                if (settingsThemeIcon) settingsThemeIcon.setAttribute('data-lucide', 'moon');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+                const themeIcon = document.getElementById('theme-icon');
+                if (themeIcon) themeIcon.setAttribute('data-lucide', 'sun');
+                const settingsThemeIcon = document.getElementById('theme-icon-settings');
+                if (settingsThemeIcon) settingsThemeIcon.setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        };
+
         // Set initial icon based on theme
         const currentThemeIcon = document.getElementById('theme-icon');
-        if (document.documentElement.classList.contains('dark')) {
-            currentThemeIcon.setAttribute('data-lucide', 'sun');
-        } else {
-            currentThemeIcon.setAttribute('data-lucide', 'moon');
+        if (currentThemeIcon) {
+            if (document.documentElement.classList.contains('dark')) {
+                currentThemeIcon.setAttribute('data-lucide', 'sun');
+            } else {
+                currentThemeIcon.setAttribute('data-lucide', 'moon');
+            }
         }
 
         // Initialize Lucide Icons
@@ -490,21 +634,85 @@
 
         // Theme Toggle Logic
         const themeToggleBtn = document.getElementById('theme-toggle');
-        
-        themeToggleBtn.addEventListener('click', function() {
-            // toggle icons inside button
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('color-theme', 'light');
-                currentThemeIcon.setAttribute('data-lucide', 'moon');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.toggleTheme();
+            });
+        }
+
+        // Dropdown functions
+        window.toggleProfileDropdown = function(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('profile-dropdown');
+            if (!dropdown) return;
+            const isOpen = !dropdown.classList.contains('hidden');
+            
+            if (isOpen) {
+                window.closeProfileDropdown();
             } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('color-theme', 'dark');
-                currentThemeIcon.setAttribute('data-lucide', 'sun');
+                dropdown.classList.remove('hidden');
+                setTimeout(() => {
+                    dropdown.classList.remove('opacity-0', 'scale-95');
+                    dropdown.classList.add('opacity-100', 'scale-100');
+                }, 10);
             }
-            // Re-render lucide icons to apply new icon
-            lucide.createIcons();
+        };
+
+        window.closeProfileDropdown = function() {
+            const dropdown = document.getElementById('profile-dropdown');
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                dropdown.classList.remove('opacity-100', 'scale-100');
+                dropdown.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    dropdown.classList.add('hidden');
+                }, 200);
+            }
+        };
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('profile-dropdown');
+            const profileBtn = document.getElementById('header-profile-btn');
+            if (dropdown && !dropdown.contains(e.target) && (!profileBtn || (!profileBtn.contains(e.target) && e.target !== profileBtn))) {
+                window.closeProfileDropdown();
+            }
         });
+
+        // Header action helpers
+        window.openAuthModal = function(mode) {
+            openModal('auth-modal', false);
+            toggleAuthMode(mode);
+        };
+        
+        window.openProfileModal = function() {
+            window.closeProfileDropdown();
+            openModal('profile-modal', false);
+        };
+
+        window.openSettingsModal = function() {
+            window.closeProfileDropdown();
+            openModal('settings-modal', false);
+            
+            // Sync setting's theme icon on open
+            const settingsThemeIcon = document.getElementById('theme-icon-settings');
+            if (settingsThemeIcon) {
+                if (document.documentElement.classList.contains('dark')) {
+                    settingsThemeIcon.setAttribute('data-lucide', 'sun');
+                } else {
+                    settingsThemeIcon.setAttribute('data-lucide', 'moon');
+                }
+                lucide.createIcons();
+            }
+        };
+
+        window.handleHeaderLogout = async function() {
+            window.closeProfileDropdown();
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+                console.error('Error logging out:', error.message);
+            }
+        };
 
         // Sidebar Logic
         const sidebar = document.getElementById('sidebar');
@@ -801,11 +1009,23 @@
         // Listen to Auth State Changes
         supabaseClient.auth.onAuthStateChange((event, session) => {
             const adminButtonContainer = document.getElementById('admin-button-container');
+            const headerLoggedOutView = document.getElementById('header-logged-out-view');
+            const headerLoggedInView = document.getElementById('header-logged-in-view');
+            const headerUserEmail = document.getElementById('header-user-email');
+
             if (session && session.user) {
                 // User is logged in
                 authLoggedOut.classList.add('hidden');
                 authLoggedIn.classList.remove('hidden');
                 userEmailDisplay.textContent = session.user.email;
+                
+                // Update header elements
+                if (headerLoggedOutView) headerLoggedOutView.classList.add('hidden');
+                if (headerLoggedInView) headerLoggedInView.classList.remove('hidden');
+                if (headerUserEmail) headerUserEmail.textContent = session.user.email;
+                
+                // Automatically close the auth modal
+                closeModal('auth-modal');
                 
                 // Show Admin Panel button ONLY if user email is shaan1002006@gmail.com
                 if (session.user.email === 'shaan1002006@gmail.com') {
@@ -835,6 +1055,12 @@
                 authLoggedIn.classList.add('hidden');
                 authLoggedOut.classList.remove('hidden');
                 userEmailDisplay.textContent = '';
+                
+                // Update header elements
+                if (headerLoggedOutView) headerLoggedOutView.classList.remove('hidden');
+                if (headerLoggedInView) headerLoggedInView.classList.add('hidden');
+                if (headerUserEmail) headerUserEmail.textContent = '';
+
                 if (adminButtonContainer) adminButtonContainer.classList.add('hidden');
                 toggleAuthMode('login'); // Reset to login view
             }
