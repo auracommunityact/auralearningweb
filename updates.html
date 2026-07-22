@@ -1015,9 +1015,9 @@
 
             if (session && session.user) {
                 // User is logged in
-                authLoggedOut.classList.add('hidden');
-                authLoggedIn.classList.remove('hidden');
-                userEmailDisplay.textContent = session.user.email;
+                if (authLoggedOut) authLoggedOut.classList.add('hidden');
+                if (authLoggedIn) authLoggedIn.classList.remove('hidden');
+                if (userEmailDisplay) userEmailDisplay.textContent = session.user.email;
                 
                 // Update header elements
                 if (headerLoggedOutView) headerLoggedOutView.classList.add('hidden');
@@ -1052,9 +1052,9 @@
 
             } else {
                 // User is logged out
-                authLoggedIn.classList.add('hidden');
-                authLoggedOut.classList.remove('hidden');
-                userEmailDisplay.textContent = '';
+                if (authLoggedIn) authLoggedIn.classList.add('hidden');
+                if (authLoggedOut) authLoggedOut.classList.remove('hidden');
+                if (userEmailDisplay) userEmailDisplay.textContent = '';
                 
                 // Update header elements
                 if (headerLoggedOutView) headerLoggedOutView.classList.remove('hidden');

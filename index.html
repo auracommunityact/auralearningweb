@@ -247,7 +247,7 @@
         
         <!-- Admin Button -->
         <div id="admin-button-container" class="hidden p-4 border-t border-slate-100 dark:border-slate-800">
-            <a href="/admin.html" class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/20 dark:hover:bg-slate-900/30 text-slate-600 dark:text-slate-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+            <a href="/admin" onclick="event.preventDefault(); closeSidebar(); navigateToRoute('/admin');" class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/20 dark:hover:bg-slate-900/30 text-slate-600 dark:text-slate-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
                 <i data-lucide="shield-check" class="w-5 h-5"></i> Admin Panel
             </a>
         </div>
@@ -650,6 +650,118 @@
         </div>
     </div>
 
+    <!-- Admin Content View -->
+    <div id="admin-content" class="hidden min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+        <div class="max-w-6xl mx-auto">
+            <!-- Loading / Checking State -->
+            <div id="admin-loading" class="text-center py-20">
+                <div class="inline-flex p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-full animate-spin mb-4">
+                    <i data-lucide="loader-2" class="w-10 h-10 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <h4 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Verifying Admin Permissions...</h4>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Checking credentials for shaan1002006@gmail.com</p>
+            </div>
+
+            <!-- Login / Access Denied State -->
+            <div id="admin-access-denied" class="hidden max-w-md mx-auto text-center px-6 py-12 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200/50 dark:border-slate-800 shadow-xl transition-colors duration-300 my-12">
+                <div class="w-16 h-16 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="shield-alert" class="w-8 h-8"></i>
+                </div>
+                <h3 id="admin-denied-title" class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Access Denied</h3>
+                <p id="admin-denied-desc" class="text-sm text-slate-500 dark:text-slate-400 mb-6">Only authorized administrator (shaan1002006@gmail.com) can access the Admin Panel.</p>
+                <div id="admin-login-prompt" class="hidden mb-6">
+                    <p class="text-xs text-slate-400 mb-4">Please log in with the admin account to continue.</p>
+                    <button onclick="openAuthModal('login')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-colors shadow-md">Log In Now</button>
+                </div>
+                <button onclick="navigateToRoute('/')" class="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition-colors">Return to Homepage</button>
+            </div>
+
+            <!-- Actual Admin Dashboard -->
+            <div id="admin-dashboard" class="hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50">Administrator Mode</span>
+                        </div>
+                        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Admin Dashboard</h1>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage announcements, updates, and learning posts across Aura Learning.</p>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <button onclick="navigateToRoute('/')" class="flex-1 sm:flex-initial px-4 py-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <i data-lucide="home" class="w-4 h-4"></i> Home
+                        </button>
+                        <button onclick="openAdminPostModal()" class="flex-1 sm:flex-initial px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20">
+                            <i data-lucide="plus" class="w-4 h-4"></i> New Post
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Posts Grid -->
+                <div id="admin-posts-container" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <!-- Posts loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Policy / Terms Content View -->
+    <div id="policy-content" class="hidden min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+        <div class="max-w-3xl mx-auto bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200/50 dark:border-slate-800 shadow-2xl p-8 sm:p-12 transition-colors duration-300">
+            <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-100 dark:border-slate-800">
+                <button onclick="navigateToRoute('/')" class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
+                </button>
+                <span id="policy-date" class="text-xs font-medium text-slate-400">Last updated: July 2026</span>
+            </div>
+
+            <div id="policy-body" class="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 space-y-6">
+                <!-- Content injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Post Modal -->
+    <div id="admin-post-modal" class="modal fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg flex flex-col transition-colors duration-300" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-3xl transition-colors duration-300">
+                <h3 id="admin-modal-title" class="text-xl font-bold text-slate-900 dark:text-white">Create New Post</h3>
+                <button onclick="closeModal('admin-post-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="admin-post-form" class="p-6 space-y-4">
+                <input type="hidden" id="admin-post-id">
+                <div>
+                    <label for="admin-post-type" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Post Type</label>
+                    <select id="admin-post-type" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        <option value="update">Update / Amusement</option>
+                        <option value="announcement">Announcement</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="admin-post-title" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Title</label>
+                    <input type="text" id="admin-post-title" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Enter title...">
+                </div>
+                <div>
+                    <label for="admin-post-desc" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
+                    <textarea id="admin-post-desc" required rows="4" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none" placeholder="Enter description..."></textarea>
+                </div>
+                <div>
+                    <label for="admin-post-yt" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">YouTube URL (Optional)</label>
+                    <input type="url" id="admin-post-yt" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="https://youtube.com/...">
+                </div>
+                <div>
+                    <label for="admin-post-image" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Image Thumbnail (Optional)</label>
+                    <input type="file" id="admin-post-image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 dark:file:bg-indigo-950 dark:file:text-indigo-400 hover:file:bg-indigo-100 transition-all cursor-pointer">
+                </div>
+                <div class="flex gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="closeModal('admin-post-modal')" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors">Cancel</button>
+                    <button type="submit" id="admin-post-submit-btn" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-colors shadow-md shadow-indigo-200 dark:shadow-none">Publish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer Section -->
     <footer class="bg-slate-900 dark:bg-slate-950 text-slate-300 py-12 lg:py-16 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -717,10 +829,10 @@
                     <h4 class="text-white font-semibold mb-6 uppercase tracking-wider text-sm">Legal</h4>
                     <ul class="space-y-3 text-slate-400">
                         <li>
-                            <a href="/privacy-policy" onclick="event.preventDefault(); openModal('privacy-modal');" class="hover:text-white transition-colors text-left block w-full">Privacy Policy</a>
+                            <a href="/privacy-policy" onclick="event.preventDefault(); navigateToRoute('/privacy-policy');" class="hover:text-white transition-colors text-left block w-full">Privacy Policy</a>
                         </li>
                         <li>
-                            <a href="/terms-of-use" onclick="event.preventDefault(); openModal('terms-modal');" class="hover:text-white transition-colors text-left block w-full">Terms of Use</a>
+                            <a href="/terms-of-use" onclick="event.preventDefault(); navigateToRoute('/terms-of-use');" class="hover:text-white transition-colors text-left block w-full">Terms of Use</a>
                         </li>
                     </ul>
                 </div>
@@ -1467,9 +1579,9 @@
 
             if (session && session.user) {
                 // User is logged in
-                authLoggedOut.classList.add('hidden');
-                authLoggedIn.classList.remove('hidden');
-                userEmailDisplay.textContent = session.user.email;
+                if (authLoggedOut) authLoggedOut.classList.add('hidden');
+                if (authLoggedIn) authLoggedIn.classList.remove('hidden');
+                if (userEmailDisplay) userEmailDisplay.textContent = session.user.email;
                 
                 // Update header elements
                 if (headerLoggedOutView) headerLoggedOutView.classList.add('hidden');
@@ -1504,9 +1616,9 @@
 
             } else {
                 // User is logged out
-                authLoggedIn.classList.add('hidden');
-                authLoggedOut.classList.remove('hidden');
-                userEmailDisplay.textContent = '';
+                if (authLoggedIn) authLoggedIn.classList.add('hidden');
+                if (authLoggedOut) authLoggedOut.classList.remove('hidden');
+                if (userEmailDisplay) userEmailDisplay.textContent = '';
                 
                 // Update header elements
                 if (headerLoggedOutView) headerLoggedOutView.classList.remove('hidden');
@@ -1578,6 +1690,204 @@
             return null;
         }
 
+        // Navigate to Route via SPA History API
+        function navigateToRoute(path) {
+            window.history.pushState({}, '', path);
+            handleClientRouting();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        window.navigateToRoute = navigateToRoute;
+
+        // Render Policy / Terms Content
+        function renderPolicyContent(type) {
+            const bodyEl = document.getElementById('policy-body');
+            bodyEl.innerHTML = '';
+            
+            const titleEl = document.createElement('h1');
+            titleEl.className = "text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-6";
+            bodyEl.appendChild(titleEl);
+
+            if (type === 'privacy') {
+                titleEl.textContent = 'Privacy Policy';
+                bodyEl.insertAdjacentHTML('beforeend', `
+                    <p class="text-sm font-medium text-slate-500">Last updated: July 2026</p>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-6">1. Information Collection</h3>
+                    <p>Your privacy is our priority. Aura Learning stores your personal data locally on your device. We do not transmit your local profile data to our servers unless explicitly requested by you via our sync features.</p>
+                    
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-6">2. Data Usage</h3>
+                    <p>The information collected locally is used solely to enhance your personalized learning experience and track your progress within the app.</p>
+
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-6">3. Data Retention</h3>
+                    <p>Your local data stays entirely on your device until you delete the app or manually clear your application data.</p>
+                    
+                    <p class="mt-8 text-sm text-slate-500">For any questions regarding these terms, please contact us at auralearning.help@gmail.com</p>
+                `);
+            } else {
+                titleEl.textContent = 'Terms of Use';
+                bodyEl.insertAdjacentHTML('beforeend', `
+                    <p class="text-sm font-medium text-slate-500">Last updated: July 2026</p>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-6">1. Acceptance of Terms</h3>
+                    <p>By downloading or using the Aura Learning app, you agree to be bound by these Terms of Use. If you disagree with any part of the terms, you may not access the service.</p>
+
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-6">2. Use License</h3>
+                    <p>Permission is granted to temporarily download one copy of the materials (information or software) on Aura Learning for personal, non-commercial transitory viewing only.</p>
+
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mt-6">3. Disclaimer</h3>
+                    <p>The materials within Aura Learning are provided on an 'as is' basis. We make no warranties, expressed or implied, and hereby disclaim and negate all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.</p>
+                    
+                    <p class="mt-8 text-sm text-slate-500">For any questions regarding these terms, please contact us at auralearning.help@gmail.com</p>
+                `);
+            }
+            lucide.createIcons();
+        }
+
+        // Check and Render Admin Panel
+        async function checkAndRenderAdminPanel() {
+            const loadingEl = document.getElementById('admin-loading');
+            const deniedEl = document.getElementById('admin-access-denied');
+            const dashboardEl = document.getElementById('admin-dashboard');
+            const loginPromptEl = document.getElementById('admin-login-prompt');
+            const deniedTitle = document.getElementById('admin-denied-title');
+            const deniedDesc = document.getElementById('admin-denied-desc');
+
+            if (loadingEl) loadingEl.classList.remove('hidden');
+            if (deniedEl) deniedEl.classList.add('hidden');
+            if (dashboardEl) dashboardEl.classList.add('hidden');
+
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (loadingEl) loadingEl.classList.add('hidden');
+
+                if (!session || !session.user) {
+                    if (deniedEl) deniedEl.classList.remove('hidden');
+                    if (deniedTitle) deniedTitle.textContent = 'Authentication Required';
+                    if (deniedDesc) deniedDesc.textContent = 'You must be logged in as the administrator (shaan1002006@gmail.com) to access the Admin Panel.';
+                    if (loginPromptEl) loginPromptEl.classList.remove('hidden');
+                    return;
+                }
+
+                if (session.user.email !== 'shaan1002006@gmail.com') {
+                    if (deniedEl) deniedEl.classList.remove('hidden');
+                    if (deniedTitle) deniedTitle.textContent = 'Access Denied';
+                    if (deniedDesc) deniedDesc.textContent = `You are logged in as ${session.user.email}. Only the authorized administrator (shaan1002006@gmail.com) can access the Admin Panel.`;
+                    if (loginPromptEl) loginPromptEl.classList.add('hidden');
+                    return;
+                }
+
+                if (loginPromptEl) loginPromptEl.classList.add('hidden');
+                if (dashboardEl) dashboardEl.classList.remove('hidden');
+                loadAdminPosts();
+            } catch (err) {
+                console.error("Admin auth check error:", err);
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (deniedEl) deniedEl.classList.remove('hidden');
+                if (deniedTitle) deniedTitle.textContent = 'Error';
+                if (deniedDesc) deniedDesc.textContent = 'Failed to verify authentication status.';
+            }
+        }
+
+        async function loadAdminPosts() {
+            const container = document.getElementById('admin-posts-container');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="inline-flex p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-full animate-spin mb-3">
+                        <i data-lucide="loader-2" class="w-6 h-6 text-indigo-600 dark:text-indigo-400"></i>
+                    </div>
+                    <p class="text-sm text-slate-500">Loading posts...</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            const { data, error } = await supabaseClient
+                .from('updates_amusement')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                container.innerHTML = `<p class="col-span-full text-center text-red-600 py-8">Error loading posts: ${error.message}</p>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="col-span-full text-center text-slate-400 py-12">No posts found. Click "+ New Post" to create one.</p>`;
+                return;
+            }
+
+            container.innerHTML = data.map(post => {
+                let displayTitle = post.title || '';
+                const isAnnouncement = displayTitle.startsWith('[Announcement] ');
+                if (isAnnouncement) {
+                    displayTitle = displayTitle.replace('[Announcement] ', '');
+                }
+                const badgeColor = isAnnouncement ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/50' : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/50';
+                const badgeText = isAnnouncement ? 'Announcement' : 'Update / Amusement';
+
+                return `
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/50 dark:border-slate-800 shadow-sm flex flex-col justify-between transition-colors duration-300">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold border ${badgeColor}">${badgeText}</span>
+                                <span class="text-xs text-slate-400">${new Date(post.created_at || Date.now()).toLocaleDateString()}</span>
+                            </div>
+                            <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2 line-clamp-2">${displayTitle}</h3>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm line-clamp-3 mb-4">${post.description || ''}</p>
+                            ${post.image_url ? `<img src="${post.image_url}" alt="Thumbnail" class="w-full h-36 object-cover rounded-2xl mb-4 border border-slate-100 dark:border-slate-800">` : ''}
+                        </div>
+                        <div class="flex gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <button onclick="editAdminPost('${post.id}')" class="flex-1 py-2 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i> Edit
+                            </button>
+                            <button onclick="deleteAdminPost('${post.id}')" class="flex-1 py-2 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        window.openAdminPostModal = function(post = null) {
+            const form = document.getElementById('admin-post-form');
+            if (form) form.reset();
+            const idInput = document.getElementById('admin-post-id');
+            if (idInput) idInput.value = '';
+            if (post) {
+                document.getElementById('admin-modal-title').textContent = 'Edit Post';
+                if (idInput) idInput.value = post.id;
+                const isAnnouncement = post.title && post.title.startsWith('[Announcement] ');
+                document.getElementById('admin-post-type').value = isAnnouncement ? 'announcement' : 'update';
+                document.getElementById('admin-post-title').value = isAnnouncement ? post.title.replace('[Announcement] ', '') : post.title;
+                document.getElementById('admin-post-desc').value = post.description || '';
+                document.getElementById('admin-post-yt').value = post.youtube_url || '';
+                document.getElementById('admin-post-submit-btn').textContent = 'Update Post';
+            } else {
+                document.getElementById('admin-modal-title').textContent = 'Create New Post';
+                document.getElementById('admin-post-submit-btn').textContent = 'Publish';
+            }
+            openModal('admin-post-modal', false);
+        };
+
+        window.editAdminPost = async function(id) {
+            const { data, error } = await supabaseClient.from('updates_amusement').select('*').eq('id', id).single();
+            if (error || !data) {
+                alert('Failed to load post for editing.');
+                return;
+            }
+            openAdminPostModal(data);
+        };
+
+        window.deleteAdminPost = async function(id) {
+            if (!confirm('Are you sure you want to delete this post?')) return;
+            const { error } = await supabaseClient.from('updates_amusement').delete().eq('id', id);
+            if (error) {
+                alert('Failed to delete post: ' + error.message);
+                return;
+            }
+            loadAdminPosts();
+        };
+
         // Hide/Show Book Detail or Homepage view
         function showNormalHomepage(updateUrl = true) {
             if (updateUrl) {
@@ -1594,14 +1904,20 @@
             const feedOverlay = document.getElementById('feed-overlay');
             const privacyModal = document.getElementById('privacy-modal');
             const termsModal = document.getElementById('terms-modal');
+            const adminPostModal = document.getElementById('admin-post-modal');
 
             if (feedPostModal && feedPostModal.classList.contains('open')) closeFeedPostModal();
             if (feedOverlay && feedOverlay.classList.contains('open')) closeFeedOverlay();
             if (privacyModal && privacyModal.classList.contains('open')) closeModal('privacy-modal');
             if (termsModal && termsModal.classList.contains('open')) closeModal('terms-modal');
+            if (adminPostModal && adminPostModal.classList.contains('open')) closeModal('admin-post-modal');
 
             document.getElementById('homepage-content').classList.remove('hidden');
             document.getElementById('book-content').classList.add('hidden');
+            const adminContent = document.getElementById('admin-content');
+            if (adminContent) adminContent.classList.add('hidden');
+            const policyContent = document.getElementById('policy-content');
+            if (policyContent) policyContent.classList.add('hidden');
             
             loadLibraryBooks();
         }
@@ -1784,6 +2100,10 @@
                     // Toggle sections
                     document.getElementById('homepage-content').classList.add('hidden');
                     document.getElementById('book-content').classList.remove('hidden');
+                    const adminContent = document.getElementById('admin-content');
+                    if (adminContent) adminContent.classList.add('hidden');
+                    const policyContent = document.getElementById('policy-content');
+                    if (policyContent) policyContent.classList.add('hidden');
                     renderSharedContent(type, data);
                 }
                 
@@ -1799,6 +2119,25 @@
                 return;
             }
 
+            // Hide all primary view containers
+            const homepage = document.getElementById('homepage-content');
+            const bookContent = document.getElementById('book-content');
+            const adminContent = document.getElementById('admin-content');
+            const policyContent = document.getElementById('policy-content');
+
+            if (homepage) homepage.classList.add('hidden');
+            if (bookContent) bookContent.classList.add('hidden');
+            if (adminContent) adminContent.classList.add('hidden');
+            if (policyContent) policyContent.classList.add('hidden');
+
+            // Close modals
+            closeModal('privacy-modal');
+            closeModal('terms-modal');
+            closeModal('auth-modal');
+            closeModal('profile-modal');
+            closeModal('settings-modal');
+            closeModal('admin-post-modal');
+
             // Check dynamic path routing
             const courseMatch = path.match(/^\/course\/([^/]+)/);
             const videoMatch = path.match(/^\/video\/([^/]+)/);
@@ -1806,11 +2145,27 @@
             const pageMatch = path.match(/^\/page\/([^/]+)/);
             const announcementMatch = path.match(/^\/announcement\/([^/]+)/);
             const uploadMatch = path.match(/^\/upload\/([^/]+)/);
+            const adminMatch = path.match(/^\/admin/);
             const privacyMatch = path.match(/^\/privacy-policy/);
             const termsMatch = path.match(/^\/terms-of-use/);
             const hash = window.location.hash;
 
-            if (courseMatch) {
+            if (adminMatch) {
+                if (adminContent) {
+                    adminContent.classList.remove('hidden');
+                    checkAndRenderAdminPanel();
+                }
+            } else if (privacyMatch) {
+                if (policyContent) {
+                    policyContent.classList.remove('hidden');
+                    renderPolicyContent('privacy');
+                }
+            } else if (termsMatch) {
+                if (policyContent) {
+                    policyContent.classList.remove('hidden');
+                    renderPolicyContent('terms');
+                }
+            } else if (courseMatch) {
                 loadContentFromSlug('course', courseMatch[1]);
             } else if (videoMatch) {
                 loadContentFromSlug('video', videoMatch[1]);
@@ -1822,11 +2177,8 @@
                 loadFeedPostFromSlug('announcement', announcementMatch[1]);
             } else if (uploadMatch) {
                 loadFeedPostFromSlug('upload', uploadMatch[1]);
-            } else if (privacyMatch) {
-                openModal('privacy-modal', false);
-            } else if (termsMatch) {
-                openModal('terms-modal', false);
             } else if (hash === '#updates' || hash === '#announcements') {
+                showNormalHomepage();
                 openFeedOverlay(hash === '#announcements' ? 'announcements' : 'updates');
             } else {
                 // Check if redirected from content not found on server
@@ -2397,6 +2749,67 @@
                 }
             }, 300);
         }
+
+        // Admin Post Form Submit Handler
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('admin-post-form');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const id = document.getElementById('admin-post-id').value;
+                    const type = document.getElementById('admin-post-type').value;
+                    let title = document.getElementById('admin-post-title').value.trim();
+                    const description = document.getElementById('admin-post-desc').value.trim();
+                    const youtube_url = document.getElementById('admin-post-yt').value.trim();
+                    const imageFile = document.getElementById('admin-post-image').files[0];
+
+                    if (type === 'announcement' && !title.startsWith('[Announcement] ')) {
+                        title = `[Announcement] ${title}`;
+                    }
+
+                    const submitBtn = document.getElementById('admin-post-submit-btn');
+                    submitBtn.textContent = 'Saving...';
+                    submitBtn.disabled = true;
+
+                    let imageUrl = null;
+                    if (imageFile) {
+                        const fileName = `admin_${Date.now()}_${imageFile.name}`;
+                        const { data: uploadData, error: uploadErr } = await supabaseClient.storage.from('app-icons').upload(fileName, imageFile);
+                        if (!uploadErr) {
+                            const { data: publicData } = supabaseClient.storage.from('app-icons').getPublicUrl(fileName);
+                            imageUrl = publicData.publicUrl;
+                        }
+                    }
+
+                    const postData = {
+                        title,
+                        description,
+                        youtube_url: youtube_url || null,
+                        ...(imageUrl ? { image_url: imageUrl } : {})
+                    };
+
+                    let error;
+                    if (id) {
+                        const res = await supabaseClient.from('updates_amusement').update(postData).eq('id', id);
+                        error = res.error;
+                    } else {
+                        const res = await supabaseClient.from('updates_amusement').insert([postData]);
+                        error = res.error;
+                    }
+
+                    submitBtn.textContent = id ? 'Update Post' : 'Publish';
+                    submitBtn.disabled = false;
+
+                    if (error) {
+                        alert('Error saving post: ' + error.message);
+                        return;
+                    }
+
+                    closeModal('admin-post-modal');
+                    loadAdminPosts();
+                });
+            }
+        });
 
         // Auto execute on load
         handleClientRouting();
