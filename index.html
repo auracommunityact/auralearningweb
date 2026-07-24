@@ -2071,6 +2071,11 @@
             closeModal('admin-post-modal');
 
             // Check dynamic path routing
+            if (path === '/sitemap.xml' || path === '/robots.txt') {
+                window.location.replace(path);
+                return;
+            }
+
             const courseMatch = path.match(/^\/course\/([^/]+)/);
             const videoMatch = path.match(/^\/video\/([^/]+)/);
             const bookMatch = path.match(/^\/book\/([^/]+)/);
