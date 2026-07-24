@@ -2079,7 +2079,11 @@
             const uploadMatch = path.match(/^\/upload\/([^/]+)/);
             const adminMatch = path.match(/^\/admin/);
             const privacyMatch = path.match(/^\/privacy-policy/);
-            const termsMatch = path.match(/^\/terms-of-use/);
+            const termsMatch = path.match(/^\/(terms-of-use|terms)/);
+            const booksMatch = path.match(/^\/books/);
+            const videosMatch = path.match(/^\/videos/);
+            const aboutMatch = path.match(/^\/about/);
+            const contactMatch = path.match(/^\/contact/);
             const hash = window.location.hash;
 
             if (adminMatch) {
@@ -2096,6 +2100,20 @@
                 if (policyContent) {
                     policyContent.classList.remove('hidden');
                     renderPolicyContent('terms');
+                }
+            } else if (booksMatch) {
+                showNormalHomepage(false);
+                const librarySec = document.getElementById('library-section');
+                if (librarySec) librarySec.scrollIntoView({ behavior: 'smooth' });
+            } else if (videosMatch) {
+                showNormalHomepage(false);
+                const videosSec = document.getElementById('updates') || document.getElementById('library-section');
+                if (videosSec) videosSec.scrollIntoView({ behavior: 'smooth' });
+            } else if (aboutMatch || contactMatch) {
+                showNormalHomepage(false);
+                if (contactMatch) {
+                    const footerEl = document.querySelector('footer');
+                    if (footerEl) footerEl.scrollIntoView({ behavior: 'smooth' });
                 }
             } else if (courseMatch) {
                 loadContentFromSlug('course', courseMatch[1]);

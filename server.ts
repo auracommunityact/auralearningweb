@@ -205,8 +205,16 @@ async function handleDynamicRoute(req: any, res: any, type: string, slugOverride
     } else if (type === 'page') {
       if (slug === 'privacy-policy') {
         data = { title: 'Privacy Policy', description: 'Review our privacy practices and how we protect your data.' };
-      } else if (slug === 'terms-of-use') {
+      } else if (slug === 'terms-of-use' || slug === 'terms') {
         data = { title: 'Terms of Use', description: 'Read our terms of service for using Aura Learning.' };
+      } else if (slug === 'books') {
+        data = { title: 'Books & Resources', description: 'Explore our collection of educational books and study notes on Aura Learning.' };
+      } else if (slug === 'videos') {
+        data = { title: 'Video Lessons', description: 'Watch interactive video tutorials and lessons on Aura Learning.' };
+      } else if (slug === 'about') {
+        data = { title: 'About Aura Learning', description: 'Learn more about Aura Learning, our mission, and distraction-free learning.' };
+      } else if (slug === 'contact') {
+        data = { title: 'Contact Us', description: 'Get in touch with the Aura Learning team.' };
       }
     }
   } catch (dbError) {
@@ -299,66 +307,124 @@ app.get('/book/:slug', (req, res) => handleDynamicRoute(req, res, 'book'));
 app.get('/page/:slug', (req, res) => handleDynamicRoute(req, res, 'page'));
 app.get('/announcement/:slug', (req, res) => handleDynamicRoute(req, res, 'announcement'));
 app.get('/upload/:slug', (req, res) => handleDynamicRoute(req, res, 'upload'));
+app.get('/books', (req, res) => handleDynamicRoute(req, res, 'page', 'books'));
+app.get('/videos', (req, res) => handleDynamicRoute(req, res, 'page', 'videos'));
+app.get('/about', (req, res) => handleDynamicRoute(req, res, 'page', 'about'));
+app.get('/contact', (req, res) => handleDynamicRoute(req, res, 'page', 'contact'));
 app.get('/privacy-policy', (req, res) => handleDynamicRoute(req, res, 'page', 'privacy-policy'));
 app.get('/terms-of-use', (req, res) => handleDynamicRoute(req, res, 'page', 'terms-of-use'));
+app.get('/terms', (req, res) => handleDynamicRoute(req, res, 'page', 'terms'));
 
-// Route for /robot (as requested by user)
-app.get('/robot', (req, res) => {
+// Routes for robots.txt and /robot
+const ROBOTS_TXT_CONTENT = `User-agent: *
+Allow: /
+
+Sitemap: https://aura.auralearning.workers.dev/sitemap.xml
+`;
+
+app.get('/robots.txt', (req, res) => {
   res.header('Content-Type', 'text/plain');
-  res.send('User-agent: *\nAllow: /\nSitemap: https://aura.auralearning.workers.dev/sitemap.xml');
+  res.status(200).send(ROBOTS_TXT_CONTENT);
 });
 
-// API Route: Dynamic sitemap.xml that automatically updates with new books/videos/courses
+app.get('/robot', (req, res) => {
+  res.header('Content-Type', 'text/plain');
+  res.status(200).send(ROBOTS_TXT_CONTENT);
+});
+
+// API Route: Dynamic sitemap.xml according to sitemaps.org standards
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const host = req.get('host') || '';
-    const baseUrl = (host.includes('localhost') || host.includes('127.0.0.1'))
-      ? `http://${host}`
-      : 'https://aura.auralearning.workers.dev';
+    const baseUrl = 'https://aura.auralearning.workers.dev';
+    const today = new Date().toISOString().split('T')[0];
 
     // Fetch dynamic content from Supabase
-    const { data: books } = await supabaseClient.from('books').select('id');
+    const { data: books } = await supabaseClient.from('books').select('id, slug');
     const { data: videos } = await supabaseClient.from('videos').select('id');
     const { data: courses } = await supabaseClient.from('courses').select('id');
     const { data: posts } = await supabaseClient.from('updates_amusement').select('id, title');
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-    
-    // 1. Homepage
-    xml += `  <url><loc>${baseUrl}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n`;
 
-    // 2. Sections
-    const sections = ['#updates', '#announcements', '#library-section', 'privacy-policy', 'terms-of-use'];
-    for (const section of sections) {
-      const isPage = section.startsWith('privacy') || section.startsWith('terms');
-      xml += `  <url><loc>${baseUrl}/${section}</loc><changefreq>${isPage ? 'monthly' : 'weekly'}</changefreq><priority>${isPage ? '0.5' : '0.9'}</priority></url>\n`;
+    // 1. Primary pages required by spec
+    const mainPages = [
+      { path: '', priority: '1.0', changefreq: 'daily' },
+      { path: 'books', priority: '0.8', changefreq: 'weekly' },
+      { path: 'videos', priority: '0.8', changefreq: 'weekly' },
+      { path: 'about', priority: '0.7', changefreq: 'monthly' },
+      { path: 'contact', priority: '0.7', changefreq: 'monthly' },
+      { path: 'privacy-policy', priority: '0.5', changefreq: 'monthly' },
+      { path: 'terms', priority: '0.5', changefreq: 'monthly' }
+    ];
+
+    for (const page of mainPages) {
+      const loc = page.path ? `${baseUrl}/${page.path}` : `${baseUrl}/`;
+      xml += `  <url>\n`;
+      xml += `    <loc>${loc}</loc>\n`;
+      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+      xml += `    <priority>${page.priority}</priority>\n`;
+      xml += `  </url>\n`;
     }
 
-    // 3. Dynamic book pages
-    if (books) books.forEach(b => xml += `  <url><loc>${baseUrl}/book/${b.id}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`);
-    
-    // 4. Dynamic video pages
-    if (videos) videos.forEach(v => xml += `  <url><loc>${baseUrl}/video/${v.id}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`);
+    // 2. Dynamic book pages
+    if (books && books.length > 0) {
+      books.forEach(b => {
+        const slug = b.slug || b.id;
+        xml += `  <url>\n`;
+        xml += `    <loc>${baseUrl}/book/${encodeURIComponent(slug)}</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.7</priority>\n`;
+        xml += `  </url>\n`;
+      });
+    }
 
-    // 5. Dynamic course pages
-    if (courses) courses.forEach(c => xml += `  <url><loc>${baseUrl}/course/${c.id}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`);
+    // 3. Dynamic video pages
+    if (videos && videos.length > 0) {
+      videos.forEach(v => {
+        xml += `  <url>\n`;
+        xml += `    <loc>${baseUrl}/video/${encodeURIComponent(v.id)}</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.7</priority>\n`;
+        xml += `  </url>\n`;
+      });
+    }
 
-    // 6. Dynamic announcements and uploads
-    if (posts) {
+    // 4. Dynamic course pages
+    if (courses && courses.length > 0) {
+      courses.forEach(c => {
+        xml += `  <url>\n`;
+        xml += `    <loc>${baseUrl}/course/${encodeURIComponent(c.id)}</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.7</priority>\n`;
+        xml += `  </url>\n`;
+      });
+    }
+
+    // 5. Dynamic announcements and uploads
+    if (posts && posts.length > 0) {
       posts.forEach(p => {
         const type = p.title && p.title.startsWith('[Announcement] ') ? 'announcement' : 'upload';
-        xml += `  <url><loc>${baseUrl}/${type}/${p.id}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
+        xml += `  <url>\n`;
+        xml += `    <loc>${baseUrl}/${type}/${encodeURIComponent(p.id)}</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += `    <changefreq>monthly</changefreq>\n`;
+        xml += `    <priority>0.6</priority>\n`;
+        xml += `  </url>\n`;
       });
     }
 
     xml += `</urlset>`;
 
-    res.header('Content-Type', 'application/xml');
+    res.header('Content-Type', 'application/xml; charset=utf-8');
     res.status(200).send(xml);
   } catch (error) {
     console.error("Sitemap XML generation error:", error);
-    res.status(500).send("Error generating sitemap");
+    res.status(500).header('Content-Type', 'application/xml; charset=utf-8').send('<?xml version="1.0" encoding="UTF-8"?><error>Error generating sitemap</error>');
   }
 });
 
