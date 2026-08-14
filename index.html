@@ -306,9 +306,23 @@
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight transition-colors duration-300">
                         Transform Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500 dark:from-indigo-400 dark:to-violet-400">Education Journey</span> with Aura Learning
                     </h1>
-                    <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto lg:mx-0 transition-colors duration-300">
+                    <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto lg:mx-0 transition-colors duration-300">
                         Experience a personalized, smart learning application designed to adapt to your unique pace and goals. Your ultimate companion for continuous growth.
                     </p>
+                    
+                    <!-- Start Learning Primary CTA Button -->
+                    <div class="mb-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                        <a id="start-learning-btn" 
+                           href="https://auralearning.base44.app/" 
+                           aria-label="Start Learning"
+                           class="group relative overflow-hidden w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 hover:from-indigo-700 hover:via-indigo-700 hover:to-violet-700 text-white font-extrabold text-lg sm:text-xl rounded-2xl shadow-xl shadow-indigo-600/25 dark:shadow-indigo-950/50 hover:shadow-2xl hover:shadow-indigo-600/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 ease-out z-10 select-none cursor-pointer">
+                            <!-- Inner subtle shimmer backdrop -->
+                            <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></span>
+                            <i data-lucide="sparkles" class="w-6 h-6 text-indigo-200"></i>
+                            <span>Start Learning</span>
+                            <i data-lucide="arrow-right" class="w-6 h-6 text-indigo-200 group-hover:translate-x-1.5 transition-transform duration-300"></i>
+                        </a>
+                    </div>
                     <!-- Download Aura Learning Section -->
                     <div id="main-download-area" class="mt-8 text-center lg:text-left scroll-mt-24">
                         <h3 id="download-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mb-3 flex items-center justify-center lg:justify-start gap-2.5">
@@ -973,6 +987,11 @@
                 <div>
                     <label for="admin-post-desc" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
                     <textarea id="admin-post-desc" required rows="4" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none" placeholder="Enter description..."></textarea>
+                    
+                    <!-- Admin Link Preview Live Area -->
+                    <div id="admin-link-preview-container" class="mt-4 hidden">
+                        <!-- Filled by JS -->
+                    </div>
                 </div>
                 <div>
                     <label for="admin-post-yt" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">YouTube URL (Optional)</label>
@@ -2019,12 +2038,18 @@
                 const isAnnouncement = post.title && post.title.startsWith('[Announcement] ');
                 document.getElementById('admin-post-type').value = isAnnouncement ? 'announcement' : 'update';
                 document.getElementById('admin-post-title').value = isAnnouncement ? post.title.replace('[Announcement] ', '') : post.title;
-                document.getElementById('admin-post-desc').value = post.description || '';
+                const descInput = document.getElementById('admin-post-desc');
+                if (descInput) {
+                    descInput.value = post.description || '';
+                    descInput.dispatchEvent(new Event('input'));
+                }
                 document.getElementById('admin-post-yt').value = post.youtube_url || '';
                 document.getElementById('admin-post-submit-btn').textContent = 'Update Post';
             } else {
                 document.getElementById('admin-modal-title').textContent = 'Create New Post';
                 document.getElementById('admin-post-submit-btn').textContent = 'Publish';
+                const descInput = document.getElementById('admin-post-desc');
+                if (descInput) descInput.dispatchEvent(new Event('input'));
             }
             openModal('admin-post-modal', false);
         };
@@ -2872,7 +2897,7 @@
 
             document.getElementById('feed-post-modal-title-top').textContent = displayTitle;
             document.getElementById('feed-post-title').textContent = displayTitle;
-            document.getElementById('feed-post-description').textContent = post.description || "";
+            renderTextWithLinkPreviews(post.description || "", document.getElementById('feed-post-description'));
             
             const dateStr = post.created_at ? new Date(post.created_at).toLocaleDateString('en-US', {
                 day: 'numeric', month: 'long', year: 'numeric'
@@ -2970,8 +2995,118 @@
             }, 300);
         }
 
+        // --- URL Link Preview Logic ---
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const linkPreviewCache = new Map();
+
+        async function fetchUrlPreview(url) {
+            if (linkPreviewCache.has(url)) return linkPreviewCache.get(url);
+            try {
+                const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+                if (!res.ok) throw new Error('Preview fetch failed');
+                const data = await res.json();
+                linkPreviewCache.set(url, data);
+                return data;
+            } catch (err) {
+                console.warn('Could not fetch link preview for', url, err);
+                return null;
+            }
+        }
+
+        const escapeHtml = (unsafe) => (unsafe || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+        function createPreviewCardHTML(previewData) {
+            if (!previewData) return '';
+            const { title, description, image, favicon, domain, url } = previewData;
+            
+            const safeTitle = escapeHtml(title || domain || 'Link');
+            const safeDescription = escapeHtml(description);
+            const safeImage = escapeHtml(image);
+            const safeFavicon = escapeHtml(favicon);
+            const safeDomain = escapeHtml(domain || url);
+            const safeUrl = escapeHtml(url);
+
+            const imageHtml = safeImage 
+                ? `<div class="w-full sm:w-1/3 h-40 sm:h-auto bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0"><img src="${safeImage}" alt="Preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"></div>` 
+                : '';
+            const faviconHtml = safeFavicon
+                ? `<img src="${safeFavicon}" class="w-4 h-4 rounded-sm shrink-0" alt="favicon">`
+                : `<i data-lucide="link" class="w-4 h-4 shrink-0"></i>`;
+
+            return `
+                <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="block mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow bg-slate-50 dark:bg-slate-900/50 group no-underline">
+                    <div class="flex flex-col sm:flex-row h-full">
+                        ${imageHtml}
+                        <div class="p-4 flex flex-col justify-center w-full min-w-0">
+                            <div class="flex items-center gap-2 mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                ${faviconHtml}
+                                <span class="uppercase tracking-wide truncate">${safeDomain}</span>
+                            </div>
+                            <h4 class="text-slate-900 dark:text-white font-bold line-clamp-2 leading-snug mb-1 text-sm sm:text-base">${safeTitle}</h4>
+                            ${safeDescription ? `<p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 line-clamp-2">${safeDescription}</p>` : ''}
+                        </div>
+                    </div>
+                </a>
+            `;
+        }
+
+        async function renderTextWithLinkPreviews(text, containerElement) {
+            const safeText = escapeHtml(text);
+            const urls = (text || "").match(urlRegex) || [];
+            const firstUrl = urls[0];
+
+            const htmlWithLinks = safeText.replace(urlRegex, (url) => 
+                `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline break-all">${url}</a>`
+            );
+            
+            containerElement.innerHTML = htmlWithLinks;
+
+            if (firstUrl) {
+                const previewData = await fetchUrlPreview(firstUrl);
+                if (previewData && (previewData.title || previewData.image)) {
+                    containerElement.insertAdjacentHTML('beforeend', createPreviewCardHTML(previewData));
+                    lucide.createIcons({ root: containerElement });
+                }
+            }
+        }
+
         // Admin Post Form Submit Handler
         document.addEventListener('DOMContentLoaded', () => {
+            // Live Preview Event Listener for Admin Description
+            const adminDescInput = document.getElementById('admin-post-desc');
+            const adminPreviewContainer = document.getElementById('admin-link-preview-container');
+            let previewDebounceTimer = null;
+
+            if (adminDescInput && adminPreviewContainer) {
+                adminDescInput.addEventListener('input', () => {
+                    clearTimeout(previewDebounceTimer);
+                    const urls = adminDescInput.value.match(urlRegex) || [];
+                    const firstUrl = urls[0];
+                    
+                    if (firstUrl) {
+                        previewDebounceTimer = setTimeout(async () => {
+                            const previewData = await fetchUrlPreview(firstUrl);
+                            if (previewData && (previewData.title || previewData.image)) {
+                                adminPreviewContainer.innerHTML = createPreviewCardHTML(previewData);
+                                adminPreviewContainer.classList.remove('hidden');
+                                lucide.createIcons({ root: adminPreviewContainer });
+                            } else {
+                                adminPreviewContainer.classList.add('hidden');
+                                adminPreviewContainer.innerHTML = '';
+                            }
+                        }, 800);
+                    } else {
+                        adminPreviewContainer.classList.add('hidden');
+                        adminPreviewContainer.innerHTML = '';
+                    }
+                });
+            }
+
             const form = document.getElementById('admin-post-form');
             if (form) {
                 form.addEventListener('submit', async function(e) {

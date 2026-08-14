@@ -5,10 +5,101 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { google } from "googleapis";
 import { createClient } from "@supabase/supabase-js";
+import * as cheerio from "cheerio";
 
 const app = express();
 app.use(express.json());
 const PORT = 3000;
+
+// In-memory cache for link previews
+const linkPreviewCache = new Map<string, any>();
+
+// API Route: Link Preview
+app.get('/api/link-preview', async (req, res) => {
+  try {
+    const urlStr = req.query.url as string;
+    if (!urlStr) {
+      return res.status(400).json({ error: "URL is required" });
+    }
+
+    let urlObj: URL;
+    try {
+      urlObj = new URL(urlStr);
+    } catch {
+      return res.status(400).json({ error: "Invalid URL format" });
+    }
+
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return res.status(400).json({ error: "Only HTTP/HTTPS URLs are allowed" });
+    }
+
+    // Check cache
+    if (linkPreviewCache.has(urlStr)) {
+      return res.json(linkPreviewCache.get(urlStr));
+    }
+
+    const fetchResponse = await fetch(urlStr, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml'
+      },
+      signal: AbortSignal.timeout(8000)
+    });
+
+    if (!fetchResponse.ok) {
+      throw new Error(`Failed to fetch URL: ${fetchResponse.status}`);
+    }
+
+    const html = await fetchResponse.text();
+    const $ = cheerio.load(html);
+
+    const getMetaTag = (name: string) => 
+      $(`meta[property="${name}"]`).attr('content') || 
+      $(`meta[name="${name}"]`).attr('content') || 
+      $(`meta[property="og:${name}"]`).attr('content') || 
+      $(`meta[name="twitter:${name}"]`).attr('content');
+
+    let title = getMetaTag('title') || getMetaTag('og:title') || $('title').text();
+    let description = getMetaTag('description') || getMetaTag('og:description');
+    let image = getMetaTag('image') || getMetaTag('og:image');
+    let siteName = getMetaTag('site_name') || getMetaTag('og:site_name');
+
+    let favicon = $('link[rel="icon"]').attr('href') || 
+                  $('link[rel="shortcut icon"]').attr('href') || 
+                  $('link[rel="apple-touch-icon"]').attr('href');
+
+    // Resolve relative URLs
+    if (image && !image.startsWith('http')) {
+      image = new URL(image, urlStr).toString();
+    }
+    if (favicon && !favicon.startsWith('http')) {
+      favicon = new URL(favicon, urlStr).toString();
+    }
+    
+    // Default favicon if not found
+    if (!favicon) {
+      favicon = new URL('/favicon.ico', urlStr).toString();
+    }
+
+    const previewData = {
+      title: title ? title.trim() : null,
+      description: description ? description.trim() : null,
+      image,
+      favicon,
+      siteName: siteName ? siteName.trim() : null,
+      domain: urlObj.hostname,
+      url: urlStr
+    };
+
+    // Cache the successful result
+    linkPreviewCache.set(urlStr, previewData);
+    
+    res.json(previewData);
+  } catch (error: any) {
+    console.error("Link Preview API Error:", error.message);
+    res.status(500).json({ error: "Failed to generate link preview" });
+  }
+});
 
 // Initialize Supabase Client for dynamic sitemap and routing
 const SUPABASE_URL = 'https://qxoqflrqpwlythgqmjtq.supabase.co';
