@@ -321,7 +321,7 @@ async function handleDynamicRoute(req: any, res: any, type: string, slugOverride
   // Content found! Set up dynamic SEO tags
   const title = data.title || data.bookName || data.name || "Untitled Resource";
   const description = data.description || `Access this ${type} on the Aura Learning mobile app.`;
-  const defaultCover = 'https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/app-icons/IMG_20260702_103051.png';
+  const defaultCover = "https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/covers/website_1783850788360.jpg";
   const coverUrl = data.thumbnail || data.coverImage || data.cover_image || data.cover_url || data.image_url || data.cover || defaultCover;
   
   const absoluteUrl = `https://aura.auralearning.workers.dev/${type}/${slug}`;
@@ -337,7 +337,7 @@ async function handleDynamicRoute(req: any, res: any, type: string, slugOverride
 
     // Substitute page title
     html = html.replace(
-      /<title>Aura Learning – Learn Anytime, Anywhere<\/title>/,
+      /<title>.*?<\/title>/,
       `<title>${title} - Aura Learning</title>`
     );
 
@@ -354,13 +354,13 @@ async function handleDynamicRoute(req: any, res: any, type: string, slugOverride
     // Substitute description
     const shortDesc = description.length > 160 ? description.substring(0, 157) + '...' : description;
     html = html.replace(
-      /content="Aura Learning is an educational platform offering books, notes, PDFs, videos, quizzes, and study materials\..*?"/g,
+      /content="Aura Learning is an education and learning platform for books, educational videos, search, profiles, announcements, support, and useful learning resources."/g,
       `content="${shortDesc.replace(/"/g, '&quot;')}"`
     );
 
     // Substitute og:title and twitter:title
     html = html.replace(
-      /content="Aura Learning – Learn Anytime, Anywhere"/g,
+      /content="Aura Learning – Education & Learning App"/g,
       `content="${title.replace(/"/g, '&quot;')}"`
     );
 
@@ -449,7 +449,7 @@ app.get('/sitemap.xml', async (req, res) => {
       { path: 'terms', priority: '0.5', changefreq: 'monthly' }
     ];
 
-    for (const page of mainPages) {
+        for (const page of mainPages) {
       const loc = page.path ? `${baseUrl}/${page.path}` : `${baseUrl}/`;
       xml += `  <url>\n`;
       xml += `    <loc>${loc}</loc>\n`;
@@ -458,6 +458,14 @@ app.get('/sitemap.xml', async (req, res) => {
       xml += `    <priority>${page.priority}</priority>\n`;
       xml += `  </url>\n`;
     }
+
+    // Add Aura Learning Official Guide PDF
+    xml += `  <url>\n`;
+    xml += `    <loc>https://qxoqflrqpwlythgqmjtq.supabase.co/storage/v1/object/public/books/Aura-Learning-Guide.pdf</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.9</priority>\n`;
+    xml += `  </url>\n`;
 
     // 2. Dynamic book pages
     if (books && books.length > 0) {

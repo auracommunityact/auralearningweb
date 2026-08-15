@@ -74,3 +74,5 @@
                     containerElement.insertAdjacentHTML('beforeend', createPreviewCardHTML(previewData));
                     lucide.createIcons({ root: containerElement });
                 }
+            }
+        }
